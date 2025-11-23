@@ -35,10 +35,17 @@ const Navbar = () => {
             {/* Logo */}
             <div className='flex items-center'>
                 <img 
-                    src="./images/logo.png" 
+                    src={'/images/logo.png'} 
                     alt="Logo" 
-                    className='w-10 h-10 transition-transform duration-200 hover:scale-105' 
+                    // width={40} 
+                    // height={40}
+                    className=' w-10 h-10 transition-transform duration-200 hover:scale-105' 
                 />
+                <span className={`ml-3 text-xl font-bold hover:text-lime-600 cursor-pointer ${
+                    isScrolled 
+                        ? 'text-white' 
+                        : 'text-white'
+                }`}>Kamaan</span>
             </div>
 
             <div className='flex items-center gap-x-12'>
@@ -69,26 +76,32 @@ const Navbar = () => {
                             <ChevronDown size={16} className='mt-0.5' />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className='w-48 mt-2 border border-gray-200 shadow-lg rounded-lg'>
-                            <DropdownMenuItem className='cursor-pointer py-2.5 text-sm hover:bg-lime-50 hover:text-lime-700 transition-colors'>
+                           <Link href={'/portfolio/videos'} >
+                            <div className='text-center cursor-pointer py-2.5 text-sm rounded-lg hover:bg-lime-600 hover:text-white transition-colors'>
                                 Videos
-                            </DropdownMenuItem>
+                            </div>
+                           </Link> 
                             <DropdownMenuSeparator className='bg-gray-100' />
-                            <DropdownMenuItem className='cursor-pointer py-2.5 text-sm hover:bg-lime-50 hover:text-lime-700 transition-colors'>
+                            <Link href={'/portfolio/websites'}>
+                            <div className='text-center cursor-pointer py-2.5 text-sm rounded-lg hover:bg-lime-600 hover:text-white transition-colors'>
                                 WebSites
-                            </DropdownMenuItem>
+                            </div>
+                            </Link>
                             <DropdownMenuSeparator className='bg-gray-100' />
-                            <DropdownMenuItem className='cursor-pointer py-2.5 text-sm hover:bg-lime-50 hover:text-lime-700 transition-colors'>
+                             <Link href={'/portfolio/3d-models'}>
+                            <div className='text-center cursor-pointer py-2.5 text-sm rounded-lg hover:bg-lime-600 hover:text-white transition-colors'>
                                 3D Models
-                            </DropdownMenuItem>
+                            </div>
+                             </Link>                              
                         </DropdownMenuContent>
                     </DropdownMenu>
-                    <span className={`cursor-pointer transition-colors duration-200 text-[15px] font-medium py-2 ${
+                    <Link href={'/blogs'} className={`cursor-pointer transition-colors duration-200 text-[15px] font-medium py-2 ${
                         isScrolled 
                             ? 'text-white  hover:text-lime-400' 
                             : 'text-white hover:text-lime-600'
                     }`}>
                         Blogs
-                    </span>
+                    </Link>
                 </div>
 
                 {/* Contact Section */}

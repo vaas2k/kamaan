@@ -1,23 +1,8 @@
-import { Montserrat,Roboto, Poppins , Fira_Sans, Karla, Share_Tech } from "next/font/google";
+import { Karla } from "next/font/google";
 import "./globals.css";
 import Navbar from "../components/Navbar";
 import Footer from "@/components/Footer";
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  variable: "--font-geist-sans",
-  weight: ["400", "700"],
-});
-const roboto = Roboto({
-  subsets: ["latin"],
-  variable: "--font-geist-mono",
-  weight: ["400", "700"],
-});
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  variable: "--font-geist-mono",
-  weight: ["400", "700"],
-});
 
 const karla = Karla({
   subsets: ["latin"],
