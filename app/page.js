@@ -43,9 +43,6 @@ export default function Home() {
         {/* You can add your contact form component here */}
         <div className="min-h-[200px] bg-gradient-to-b from-gray-900 to-black"></div>
       </section>
-      
-      {/* Footer */}
-      <Footer />
     </div>
   );
 } 
