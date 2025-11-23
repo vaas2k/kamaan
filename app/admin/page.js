@@ -118,7 +118,7 @@ const AdminDashboard = () => {
       </motion.header>
 
       {/* Stats Overview */}
-      <motion.section
+      {/* <motion.section
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
@@ -150,7 +150,7 @@ const AdminDashboard = () => {
             </motion.div>
           ))}
         </div>
-      </motion.section>
+      </motion.section> */}
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto p-6">

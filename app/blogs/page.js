@@ -160,16 +160,16 @@ const Page = () => {
                             BLOG
                             <motion.span
                                 className="block bg-clip-text text-transparent bg-gradient-to-r from-lime-300 via-lime-400 to-lime-600"
-                                animate={{ 
-                                    backgroundPosition: ["0%", "100%", "0%"] 
+                                animate={{
+                                    backgroundPosition: ["0%", "100%", "0%"]
                                 }}
-                                transition={{ 
-                                    duration: 5, 
+                                transition={{
+                                    duration: 5,
                                     repeat: Infinity,
                                     repeatType: "reverse"
                                 }}
-                                style={{ 
-                                    backgroundSize: "200% 100%" 
+                                style={{
+                                    backgroundSize: "200% 100%"
                                 }}
                             >
                                 POSTS
@@ -245,7 +245,7 @@ const Page = () => {
                 <div className="flex flex-wrap gap-4 items-center justify-center">
                     <div className="flex items-center gap-2">
                         <BookOpen className="w-5 h-5 text-lime-400" />
-                        <select 
+                        <select
                             className="px-4 py-2 rounded-xl bg-gray-900/50 backdrop-blur-sm border border-lime-500/20 text-white focus:outline-none focus:ring-2 focus:ring-lime-500/50 focus:border-lime-500 transition-all duration-300"
                             value={selectedCategory}
                             onChange={(e) => setSelectedCategory(e.target.value)}
@@ -258,7 +258,7 @@ const Page = () => {
                     </div>
                     <div className="flex items-center gap-2">
                         <MapPin className="w-5 h-5 text-lime-400" />
-                        <select 
+                        <select
                             className="px-4 py-2 rounded-xl bg-gray-900/50 backdrop-blur-sm border border-lime-500/20 text-white focus:outline-none focus:ring-2 focus:ring-lime-500/50 focus:border-lime-500 transition-all duration-300"
                             value={selectedAuthor}
                             onChange={(e) => setSelectedAuthor(e.target.value)}
@@ -276,7 +276,10 @@ const Page = () => {
             <section className="relative py-16 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
                     {loading && blogs.length === 0 ? (
-                        <Loading />
+                        <div className="flex justify-center py-12">
+                            <div className="w-8 h-8 border-2 border-lime-500 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+
                     ) : (
                         <motion.div
                             layout
@@ -316,7 +319,7 @@ const Page = () => {
                                                                 priority={index < 6}
                                                             />
                                                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                                            
+
                                                             {/* Category Badge */}
                                                             <div className="absolute top-4 left-4 bg-lime-500/90 backdrop-blur-sm rounded-full px-3 py-1">
                                                                 <span className="text-white text-sm font-medium">

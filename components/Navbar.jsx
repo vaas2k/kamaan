@@ -105,14 +105,16 @@ const Navbar = () => {
                 </div>
 
                 {/* Contact Section */}
-                <div className='flex items-center gap-x-3 pl-4 border-l border-gray-200'>
+                <div className='flex items-center gap-x-3 pl-4 border-l border-gray-200 '>
+                    <Link href={'/contact'}>
                     <button className={`cursor-pointer p-2.5 transition-all duration-200 rounded-lg shadow-sm hover:shadow-md ${
                         isScrolled 
-                            ? 'bg-lime-500 hover:bg-lime-400' 
-                            : 'bg-lime-600 hover:bg-lime-700'
+                        ? 'bg-lime-500 hover:bg-lime-400' 
+                        : 'bg-lime-600 hover:bg-lime-700'
                     }`}>
                         <PhoneCall size={16} className="text-white" />
                     </button>
+                        </Link>
                     <div className='text-right'>
                         <div className={`text-[12px] font-medium tracking-wide ${
                             isScrolled ? 'text-white' : 'text-white'
@@ -122,7 +124,7 @@ const Navbar = () => {
                         <div className={`font-semibold text-[14px] tracking-tight ${
                             isScrolled ? 'text-white' : 'text-white'
                         }`}>
-                            +92 (88) 669 850
+                            +92 (349) 245 0349
                         </div>
                     </div>
                 </div>

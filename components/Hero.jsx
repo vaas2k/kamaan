@@ -2,12 +2,13 @@
 import { motion } from "motion/react";
 import React from "react";
 import ImagesSlider from "./ui/image-slider";
+import Link from "next/link";
 
 export default function Hero() {
   const images = [
-    "https://images.unsplash.com/photo-1485433592409-9018e83a1f0d?q=80&w=1814&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    "https://images.unsplash.com/photo-1483982258113-b72862e6cff6?q=80&w=3456&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    "https://images.unsplash.com/photo-1482189349482-3defd547e0e9?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://images.unsplash.com/photo-1605826832916-d0ea9d6fe71e?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://images.unsplash.com/photo-1580927752452-89d86da3fa0a?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://images.unsplash.com/photo-1713817173203-f7a9884e77ce?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   ];
   
   return (
@@ -63,12 +64,17 @@ export default function Hero() {
             transition={{ delay: 0.6 }}
             className="flex gap-4"
           >
+            <Link href={'/contact'}>
             <button className="px-8 py-4 bg-lime-500 hover:bg-lime-600 text-white font-semibold rounded-lg transition-all duration-300 hover:shadow-2xl hover:shadow-lime-500/25 transform hover:-translate-y-1">
               Start Project
             </button>
+            </Link>
+
+            <Link href={'/portfolio/vidoes'}>
             <button className="px-8 py-4 backdrop-blur-sm border border-white/20 hover:border-lime-400/50 text-white font-semibold rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-lime-500/10">
               View Portfolio
             </button>
+            </Link>
           </motion.div>
 
           {/* Stats */}

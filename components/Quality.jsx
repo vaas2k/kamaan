@@ -6,21 +6,21 @@ const Quality = () => {
   const features = [
     {
       number: "01",
-      title: "QUALITY SERVICES",
-      description: "Lorem ipsum dolor sited is amet consectetur norted."
+      title: "SKILLED DEVELOPERS AND DESIGNERS",
+      description: "Our team consists of experienced professionals dedicated to crafting exceptional digital experiences."
     },
     {
       number: "02",
-      title: "SKILLED DEVELOPERS",
-      description: "Lorem ipsum dolor sited is amet consectetur norted."
+      title: "VIDEO EDITING & 3D MODELING",
+      description: "We specialize in high-quality video editing and 3D modeling to bring your visions to life."
     }
   ];
 
   const skills = [
     { name: "DEVELOPMENT", percentage: 90 },
-    { name: "DESIGNING", percentage: 85 },
-    { name: "MARKETING", percentage: 78 },
-    { name: "BRANDING", percentage: 92 }
+    { name: "ANIMATIONS", percentage: 85 },
+    { name: "VIDEO EDITING", percentage: 78 },
+    { name: "3D MODELLING", percentage: 92 }
   ];
 
   return (
@@ -55,7 +55,7 @@ const Quality = () => {
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
                 Welcome to{" "}
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-lime-300 to-lime-500">
-                  Agency
+                  Kamaan
                 </span>
               </h1>
               
@@ -75,7 +75,7 @@ const Quality = () => {
               viewport={{ once: true }}
               className="text-gray-400 text-lg leading-relaxed max-w-2xl"
             >
-              Lorem ipsum is simply free text dolor sit amet, consectetur norted adipisicing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua lorim andrin.
+              At Kamaan, we specialize in delivering high-quality digital solutions that elevate your brand. Our team of skilled developers and designers are passionate about creating modern, innovative websites and applications tailored to your unique needs.
             </motion.p>
 
             {/* Features List */}

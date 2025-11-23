@@ -14,11 +14,13 @@
     "@radix-ui/react-navigation-menu": "^1.2.14",
     "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
+    "cloudinary": "^2.8.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.554.0",
     "mongoose": "^9.0.0",
     "motion": "^12.23.24",
     "next": "16.0.3",
+    "nodemailer": "^7.0.10",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "tailwind-merge": "^3.4.0"

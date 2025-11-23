@@ -1,24 +1,28 @@
 "use client";
 import React from "react";
 import { motion } from "framer-motion";
-import { Star, ArrowRight } from "lucide-react";
+import { Star, ArrowRight, Video, Cuboid, Globe } from "lucide-react";
+import Link from "next/link";
 
 const Services = () => {
   const services = [
     {
-      title: "WEB DEVELOPMENT",
-      description: "We build responsive, high-performance websites and web applications that drive results.",
-      icon: "💻"
+      icon: Video,
+      title: 'Video Editing',
+      description: 'Professional video editing, motion graphics, and post-production services',
+      features: ['4K Video Editing', 'Color Grading', 'Motion Graphics', 'Sound Design']
     },
     {
-      title: "GRAPHIC DESIGNING",
-      description: "Creative visual designs that capture your brand essence and engage your audience.",
-      icon: "🎨"
+      icon: Cuboid,
+      title: '3D Modeling & Animation',
+      description: 'High-quality 3D models, animations, and visual effects',
+      features: ['3D Modeling', 'Character Animation', 'Visual Effects', 'Product Visualization']
     },
     {
-      title: "DIGITAL MARKETING",
-      description: "Strategic marketing campaigns that boost your online presence and drive growth.",
-      icon: "📈"
+      icon: Globe,
+      title: 'Website Development',
+      description: 'Modern, responsive websites and web applications',
+      features: ['React/Next.js', 'Responsive Design', 'E-commerce', 'Web Applications']
     }
   ];
 
@@ -40,44 +44,54 @@ const Services = () => {
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Services Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
-          {services.map((service, index) => (
+        <section className="py-16 px-4">
+          <div className="max-w-7xl mx-auto">
             <motion.div
-              key={service.title}
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.2 }}
-              viewport={{ once: true }}
-              className="group relative"
+              className="text-center mb-16"
             >
-              <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-8 hover:border-lime-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-lime-500/10">
-                {/* Icon */}
-                <div className="text-4xl mb-6 transform group-hover:scale-110 transition-transform duration-300">
-                  {service.icon}
-                </div>
-                
-                {/* Title */}
-                <h3 className="text-2xl font-bold text-white mb-4">
-                  {service.title}
-                </h3>
-                
-                {/* Description */}
-                <p className="text-gray-400 mb-6 leading-relaxed">
-                  {service.description}
-                </p>
-                
-                {/* Learn More Link */}
-                <div className="flex items-center text-lime-400 font-semibold cursor-pointer group-hover:text-lime-300 transition-colors">
-                  <span className="mr-2">Learn More</span>
-                  <ArrowRight size={16} className="transform group-hover:translate-x-1 transition-transform" />
-                </div>
-                
-                {/* Hover Effect */}
-                <div className="absolute inset-0 border-2 border-lime-500/0 rounded-2xl group-hover:border-lime-500/20 transition-all duration-300" />
-              </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                Our <span className="text-lime-400">Services</span>
+              </h2>
+              <p className="text-gray-400 text-lg">
+                Professional creative services tailored to your needs
+              </p>
             </motion.div>
-          ))}
-        </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {services.map((service, index) => {
+                const Icon = service.icon;
+                return (
+                  <motion.div
+                    key={service.title}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.2 }}
+                    whileHover={{ y: -5 }}
+                    className="glass-morphism p-8 rounded-2xl border border-lime-500/20 hover:border-lime-500/50 transition-all duration-300 group"
+                  >
+                    <div className="w-16 h-16 bg-lime-500/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-lime-500/20 transition-colors">
+                      <Icon className="w-8 h-8 text-lime-400" />
+                    </div>
+
+                    <h3 className="text-2xl font-bold text-white mb-4">{service.title}</h3>
+                    <p className="text-gray-300 mb-6 leading-relaxed">{service.description}</p>
+
+                    <ul className="space-y-2">
+                      {service.features.map((feature, idx) => (
+                        <li key={idx} className="flex items-center gap-3 text-gray-400">
+                          <div className="w-2 h-2 bg-lime-400 rounded-full" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
 
         {/* CTA Section */}
         <motion.div
@@ -91,20 +105,24 @@ const Services = () => {
             READY FOR THE OUTSTANDING SERVICES?
           </h2>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 bg-lime-500 hover:bg-lime-600 text-white font-bold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-lime-500/25"
-            >
-              GET STARTED
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 border-2 border-lime-500 text-lime-400 hover:bg-lime-500/10 font-bold rounded-lg transition-all duration-300"
-            >
-              VIEW PORTFOLIO
-            </motion.button>
+            <Link href={'/contact'}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-4 bg-lime-500 hover:bg-lime-600 text-white font-bold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-lime-500/25"
+              >
+                GET STARTED
+              </motion.button>
+            </Link>
+            <Link href={'/portfolio/vidoes'}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-4 border-2 border-lime-500 text-lime-400 hover:bg-lime-500/10 font-bold rounded-lg transition-all duration-300"
+              >
+                VIEW PORTFOLIO
+              </motion.button>
+            </Link>
           </div>
         </motion.div>
 
@@ -125,7 +143,7 @@ const Services = () => {
               We've <span className="text-lime-400 font-bold">37800</span> satisfied customers with our services.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {stats.map((stat, index) => (
               <motion.div
@@ -152,7 +170,7 @@ const Services = () => {
           className="text-center"
         >
           <h2 className="text-3xl font-bold text-white mb-12">OUR HAPPY CLIENTS</h2>
-          
+
           <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
             {clients.map((client, index) => (
               <motion.div

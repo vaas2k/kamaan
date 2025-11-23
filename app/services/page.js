@@ -6,6 +6,7 @@ import {
     Star, Users, Clock, Award, Zap, Sparkles, ArrowUpRight,
     Eye, Github, ExternalLink, Phone, Quote
 } from "lucide-react";
+import Link from "next/link";
 
 const ServicesPage = () => {
     const [activeService, setActiveService] = useState(0);
@@ -16,11 +17,11 @@ const ServicesPage = () => {
             title: "VIDEO EDITING & GFX/VFX",
             description: "Professional video editing, motion graphics, and visual effects that bring your stories to life with stunning visual appeal.",
             features: ["4K Video Editing", "Motion Graphics", "Visual Effects", "Color Grading", "Audio Mixing"],
-            image: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=600&auto=format&fit=crop&q=60",
+            image: "https://images.unsplash.com/photo-1607112812619-182cb1c7bb61?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
             gradient: "from-purple-500/20 to-lime-500/20",
             projects: [
                 { name: "Brand Commercial", image: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=300&auto=format&fit=crop&q=60" },
-                { name: "Music Video", image: "https://images.unsplash.com/photo-1574717024453-9f6a7b5a8337?w=300&auto=format&fit=crop&q=60" }
+                { name: "Music Video", image: "https://images.unsplash.com/photo-1614963326505-843868e1d83a?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" }
             ]
         },
         {
@@ -40,11 +41,11 @@ const ServicesPage = () => {
             title: "3D MODELING & ANIMATION",
             description: "Create immersive 3D experiences with detailed modeling, texturing, and realistic animations for various applications.",
             features: ["3D Modeling", "Texturing", "Animation", "Rendering", "AR/VR Integration"],
-            image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=600&auto=format&fit=crop&q=60",
+            image: "https://images.unsplash.com/photo-1653590590390-771cf729ec44?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
             gradient: "from-orange-500/20 to-lime-500/20",
             projects: [
                 { name: "Product Visualization", image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=300&auto=format&fit=crop&q=60" },
-                { name: "Architectural Render", image: "https://images.unsplash.com/photo-1548611633-15cde58d01c9?w=300&auto=format&fit=crop&q=60" }
+                { name: "Architectural Render", image: "https://images.unsplash.com/photo-1726219835979-7b0680dd822d?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" }
             ]
         },
         {
@@ -277,8 +278,9 @@ const ServicesPage = () => {
                                 whileTap={{ scale: 0.95 }}
                             >
                                 <span className="flex items-center gap-2 font-medium">
-                                    <service.icon className="w-4 h-4" />
+                                    <service.icon className="w-6 h-6" />
                                     {service.title.split(" ")[0]}
+                                    
                                 </span>
                             </motion.button>
                         ))}
@@ -302,9 +304,9 @@ const ServicesPage = () => {
                                 className="space-y-8"
                             >
                                 <div className="flex items-center gap-4">
-                                    <div className="w-16 h-16 bg-lime-500/10 border border-lime-500/20 rounded-2xl flex items-center justify-center">
-                                        {/* {services[activeService].icon} */}
-                                    </div>
+                                    {/* <div className="w-16 h-16 bg-lime-500/10 border border-lime-500/20 rounded-2xl flex items-center justify-center">
+                                        <services[activeService].icon className="w-8 h-8 text-lime-400" />
+                                    </div> */}
                                     <h3 className="text-4xl font-bold text-white">
                                         {services[activeService].title}
                                     </h3>
@@ -331,14 +333,14 @@ const ServicesPage = () => {
                                     ))}
                                 </ul>
 
-                                <motion.button
+                                {/* <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     className="px-8 py-4 bg-lime-500 hover:bg-lime-600 text-white font-bold rounded-2xl transition-all duration-300 shadow-2xl hover:shadow-3xl hover:shadow-lime-500/25 flex items-center gap-3"
                                 >
                                     <span>Start Project</span>
                                     <ArrowUpRight className="w-5 h-5" />
-                                </motion.button>
+                                </motion.button> */}
                             </motion.div>
 
                             {/* Service Visual */}
@@ -421,7 +423,7 @@ const ServicesPage = () => {
                         </motion.div>
 
                         <h2 className="text-5xl md:text-7xl font-black text-white mb-6">
-                            PISCLE{" "}
+                            KAMAAN{" "}
                             <span className="bg-clip-text text-transparent bg-gradient-to-r from-lime-300 to-lime-500">
                                 AGENCY
                             </span>
@@ -506,7 +508,7 @@ const ServicesPage = () => {
                         >
                             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-lime-500/20 border border-lime-500/30 mb-6">
                                 <Phone className="w-4 h-4 text-lime-400" />
-                                <span className="text-lime-300 text-sm font-medium">FOR CONSULTATION</span>
+                                <Link href={'/contact'} className="text-lime-300 text-sm font-medium">FOR CONSULTATION</Link>
                             </div>
 
                             <motion.div
@@ -520,7 +522,7 @@ const ServicesPage = () => {
                                 }}
                                 transition={{ duration: 2, repeat: Infinity }}
                             >
-                                +82 (8800) - 8850
+                                +92 (349) 245 0349
                             </motion.div>
 
                             <p className="text-gray-400 text-sm">
@@ -600,15 +602,17 @@ const ServicesPage = () => {
                                 transition={{ delay: 0.5 }}
                                 viewport={{ once: true }}
                             >
+                                <Link href={'/contact'}>
                                 <motion.button
                                     whileHover={{ scale: 1.05, y: -2 }}
                                     whileTap={{ scale: 0.95 }}
                                     className="px-12 py-4 bg-lime-500 hover:bg-lime-600 text-white font-bold rounded-2xl transition-all duration-300 shadow-2xl hover:shadow-3xl hover:shadow-lime-500/25 flex items-center gap-3 text-lg"
-                                >
+                                    >
                                     <Zap className="w-6 h-6" />
                                     Start Your Project
                                     <ArrowUpRight className="w-5 h-5" />
                                 </motion.button>
+                                    </Link>
                             </motion.div>
                         </div>
                     </motion.div>

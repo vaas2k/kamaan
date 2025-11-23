@@ -7,6 +7,13 @@ import Link from "next/link";
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
+  const scrollToSection = (sectionId) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <footer className="bg-gradient-to-b from-gray-900 to-black border-t border-gray-800">
       {/* Main Footer Content */}
@@ -29,7 +36,7 @@ const Footer = () => {
               viewport={{ once: true }}
               className="text-4xl font-bold text-white mb-6"
             >
-              PISCLE
+              KAMAAN
             </motion.h1>
 
             {/* Description */}
@@ -40,7 +47,7 @@ const Footer = () => {
               viewport={{ once: true }}
               className="text-gray-400 text-lg leading-relaxed max-w-2xl mb-6"
             >
-              WELCOME TO OUR DIGITAL WEBSITE DESIGN AGENCY. THE BEST EXPERIENCE.
+              WELCOME TO OUR DIGITAL AGENCY. THE BEST EXPERIENCE.
             </motion.p>
 
             {/* Divider */}
@@ -65,26 +72,26 @@ const Footer = () => {
             </h3>
             <ul className="space-y-4">
               {[
-                "Meet the team",
-                "Our services", 
-                "Latest news",
-                "About us",
-                "Contact us"
+                { name: "Meet the team", id: "team" },
+                { name: "Our services", id: "services" }, 
+                { name: "Latest news", id: "news" },
+                // { name: "About us", id: "about" },
+                { name: "Contact us", id: "contact" }
               ].map((link, index) => (
                 <motion.li
-                  key={link}
+                  key={link.id}
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.4, delay: 0.8 + index * 0.1 }}
                   viewport={{ once: true }}
                 >
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-lime-400 transition-colors duration-300 flex items-center group"
+                  <button
+                    onClick={() => scrollToSection(link.id)}
+                    className="text-gray-400 hover:text-lime-400 transition-colors duration-300 flex items-center group w-full text-left"
                   >
                     <span className="w-2 h-2 bg-lime-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                    {link}
-                  </a>
+                    {link.name}
+                  </button>
                 </motion.li>
               ))}
             </ul>
@@ -114,9 +121,12 @@ const Footer = () => {
                 </div>
                 <div>
                   <div className="text-gray-400 text-sm">Your email</div>
-                  <div className="text-white hover:text-lime-400 transition-colors duration-300">
-                    contact@example.com
-                  </div>
+                  <a 
+                    href="mailto:contact@thekamaan.com"
+                    className="text-white hover:text-lime-400 transition-colors duration-300"
+                  >
+                    contact@thekamaan.com
+                  </a>
                 </div>
               </motion.div>
 
@@ -133,9 +143,12 @@ const Footer = () => {
                 </div>
                 <div>
                   <div className="text-gray-400 text-sm">Phone number</div>
-                  <div className="text-white hover:text-lime-400 transition-colors duration-300">
-                    +92 (866) 888 0000
-                  </div>
+                  <a 
+                    href="tel:+923492450349"
+                    className="text-white hover:text-lime-400 transition-colors duration-300"
+                  >
+                    +92 3492450349
+                  </a>
                 </div>
               </motion.div>
 
@@ -153,7 +166,7 @@ const Footer = () => {
                 <div>
                   <div className="text-gray-400 text-sm">Our location</div>
                   <div className="text-white hover:text-lime-400 transition-colors duration-300">
-                    Digital Street, Tech City
+                    Apt 703, Margalla hills intl, E-11/1, Islamabad, Pakistan
                   </div>
                 </div>
               </motion.div>
@@ -180,7 +193,14 @@ const Footer = () => {
         >
           <p className="text-gray-400 text-sm">
             © {currentYear} Copyrights by{" "}
-            <Link href={'synwavesolutions.com'} className="text-lime-400 font-semibold">Synwave Solutions</Link>
+            <a 
+              href="https://synwavesolutions.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-lime-400 font-semibold hover:text-lime-300 transition-colors duration-300"
+            >
+              Synwave Solutions
+            </a>
           </p>
         </motion.div>
       </div>
