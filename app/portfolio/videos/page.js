@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Play, Pause, Volume2, VolumeX, Maximize, ArrowRight,
@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import Loading from "@/components/Loading";
+import Link from "next/link";
 
 const VideosPage = () => {
   const [activeFilter, setActiveFilter] = useState("all");
@@ -16,15 +17,20 @@ const VideosPage = () => {
   const [videoProjects, setVideoProjects] = useState([]);
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [filterScrollPosition, setFilterScrollPosition] = useState(0);
+  const filterContainerRef = useRef(null);
 
   const filters = [
     { id: "all", label: "All Videos" },
-    { id: "commercial", label: "Commercial" },
-    { id: "music", label: "Music Videos" },
-    { id: "corporate", label: "Corporate" },
-    { id: "product", label: "Product" },
-    { id: "fashion", label: "Fashion" },
-    { id: "event", label: "Events" }
+    { id: "Short form Videos", label: "Short Form" },
+    { id: "Gaming Videos", label: "Gaming" },
+    { id: "Social Media Videos", label: "Social Media" },
+    { id: "Explainer Videos", label: "Explainer" },
+    { id: "Documentaries", label: "Documentaries" },
+    { id: "Motion Graphics", label: "Motion Graphics" },
+    { id: "Ads", label: "Ads" },
+    { id: "Music Videos", label: "Music Videos" },
+    { id: "VFX", label: "VFX" }
   ];
 
   const stats = [
@@ -34,9 +40,12 @@ const VideosPage = () => {
     { number: "24/7", label: "Support", icon: Users }
   ];
 
+  // Updated filtering logic to handle multiple categories
   const filteredVideos = activeFilter === "all"
     ? videoProjects
-    : videoProjects.filter(video => video.category === activeFilter);
+    : videoProjects.filter(video => 
+        video.categories && video.categories.includes(activeFilter)
+      );
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -67,7 +76,7 @@ const VideosPage = () => {
     // YouTube URLs
     if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
       let videoId = '';
-      
+
       // Handle different YouTube URL formats
       if (videoUrl.includes('youtube.com/watch?v=')) {
         videoId = videoUrl.split('v=')[1]?.split('&')[0];
@@ -76,7 +85,7 @@ const VideosPage = () => {
       } else if (videoUrl.includes('youtube.com/embed/')) {
         videoId = videoUrl.split('embed/')[1]?.split('?')[0];
       }
-      
+
       if (videoId) {
         return {
           type: 'youtube',
@@ -127,17 +136,14 @@ const VideosPage = () => {
   // Function to render video player based on source type
   const renderVideoPlayer = (video) => {
     const source = getVideoSource(video.videoUrl);
-    
+
     if (!source) {
       return (
         <div className="w-full h-96 bg-gray-800 rounded-2xl flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <X className="w-10 h-10 text-white" />
-            </div>
-            <p className="text-white text-lg">Invalid Video URL</p>
-            <p className="text-gray-400 text-sm mt-2">Unable to load video from provided URL</p>
-          </div>
+          <img
+           src={video.thumbnail}
+           className="w-full h-full"
+           />
         </div>
       );
     }
@@ -158,7 +164,7 @@ const VideosPage = () => {
             />
           </div>
         );
-      
+
       case 'direct':
         return (
           <div className="w-full h-96 bg-black rounded-2xl overflow-hidden relative">
@@ -173,7 +179,7 @@ const VideosPage = () => {
               <source src={source.url} type={`video/${source.url.split('.').pop()}`} />
               Your browser does not support the video tag.
             </video>
-            
+
             {/* Custom controls for direct videos */}
             <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -191,7 +197,7 @@ const VideosPage = () => {
                 >
                   {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                 </motion.button>
-                
+
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
@@ -211,7 +217,7 @@ const VideosPage = () => {
             </div>
           </div>
         );
-      
+
       default:
         return (
           <div className="w-full h-96 bg-gray-800 rounded-2xl flex items-center justify-center">
@@ -221,9 +227,9 @@ const VideosPage = () => {
               </div>
               <p className="text-white text-lg">Video Player</p>
               <p className="text-gray-400 text-sm mt-2">{video.title}</p>
-              <a 
-                href={video.videoUrl} 
-                target="_blank" 
+              <a
+                href={video.videoUrl}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block mt-4 px-4 py-2 bg-lime-500 text-white rounded-lg hover:bg-lime-600 transition-colors"
               >
@@ -246,6 +252,43 @@ const VideosPage = () => {
       }
     }
     fetchData();
+  }, []);
+
+  // Filter navigation functions
+  const scrollFilters = (direction) => {
+    const container = filterContainerRef.current;
+    if (!container) return;
+
+    const scrollAmount = 200;
+    const newPosition = direction === 'left'
+      ? filterScrollPosition - scrollAmount
+      : filterScrollPosition + scrollAmount;
+
+    container.scrollTo({
+      left: newPosition,
+      behavior: 'smooth'
+    });
+    setFilterScrollPosition(newPosition);
+  };
+
+  const canScrollLeft = filterScrollPosition > 0;
+  const canScrollRight = () => {
+    const container = filterContainerRef.current;
+    if (!container) return false;
+    return filterScrollPosition < (container.scrollWidth - container.clientWidth);
+  };
+
+  // Update scroll position on container scroll
+  useEffect(() => {
+    const container = filterContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      setFilterScrollPosition(container.scrollLeft);
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
@@ -390,26 +433,79 @@ const VideosPage = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="flex flex-wrap justify-center gap-4 mb-16"
+              className="relative mb-16"
             >
-              {filters.map((filter) => (
-                <motion.button
-                  key={filter.id}
-                  onClick={() => setActiveFilter(filter.id)}
-                  className={`px-6 py-3 rounded-full border backdrop-blur-sm transition-all duration-500 flex items-center gap-2 ${
-                    activeFilter === filter.id
+              {/* Navigation Arrows */}
+              <AnimatePresence>
+                {canScrollLeft && (
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    onClick={() => scrollFilters('left')}
+                    className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 w-10 h-10 bg-gray-900/80 backdrop-blur-sm border border-lime-500/30 rounded-full flex items-center justify-center text-lime-400 hover:bg-lime-500/20 hover:border-lime-500/50 transition-all duration-300 shadow-2xl"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <ArrowRight className="w-5 h-5 rotate-180" />
+                  </motion.button>
+                )}
+              </AnimatePresence>
+
+              <AnimatePresence>
+                {canScrollRight() && (
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    onClick={() => scrollFilters('right')}
+                    className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 w-10 h-10 bg-gray-900/80 backdrop-blur-sm border border-lime-500/30 rounded-full flex items-center justify-center text-lime-400 hover:bg-lime-500/20 hover:border-lime-500/50 transition-all duration-300 shadow-2xl"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <ArrowRight className="w-5 h-5" />
+                  </motion.button>
+                )}
+              </AnimatePresence>
+
+              {/* Filter Buttons Container */}
+              <div
+                ref={filterContainerRef}
+                className="flex overflow-x-auto scrollbar-hide gap-3 mx-12"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {filters.map((filter) => (
+                  <motion.button
+                    key={filter.id}
+                    onClick={() => setActiveFilter(filter.id)}
+                    className={`px-6 py-3 rounded-full border backdrop-blur-sm transition-all duration-500 flex items-center gap-2 whitespace-nowrap flex-shrink-0 ${activeFilter === filter.id
                       ? "bg-lime-500/20 border-lime-500 text-lime-400 shadow-2xl shadow-lime-500/25"
                       : "bg-gray-900/50 border-gray-600 text-gray-400 hover:border-lime-500/50 hover:text-lime-300"
-                  }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Filter className="w-4 h-4" />
-                  {filter.label}
-                </motion.button>
-              ))}
-            </motion.div>
+                      }`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Filter className="w-4 h-4" />
+                    {filter.label}
+                  </motion.button>
+                ))}
+              </div>
 
+              {/* Scroll Indicator */}
+              <div className="flex justify-center mt-4">
+                <div className="flex gap-1">
+                  {filters.map((_, index) => (
+                    <div
+                      key={index}
+                      className={`w-1 h-1 rounded-full transition-all duration-300 ${Math.floor((filterScrollPosition / (filterContainerRef.current?.scrollWidth || 1)) * filters.length) === index
+                        ? 'bg-lime-400 w-3'
+                        : 'bg-gray-600'
+                        }`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </motion.div>
             {/* Video Grid */}
             <motion.div
               layout
@@ -457,8 +553,25 @@ const VideosPage = () => {
                           </div>
                         </div>
 
+                        {/* Categories Badges */}
+                        <div className="absolute top-4 left-4 flex flex-col gap-1">
+                          {video.categories && video.categories.slice(0, 2).map((category, catIndex) => (
+                            <span 
+                              key={catIndex}
+                              className="bg-lime-500/90 backdrop-blur-sm rounded-full px-2 py-1 text-white text-xs font-medium"
+                            >
+                              {category}
+                            </span>
+                          ))}
+                          {video.categories && video.categories.length > 2 && (
+                            <span className="bg-lime-700/90 backdrop-blur-sm rounded-full px-2 py-1 text-white text-xs font-medium">
+                              +{video.categories.length - 2}
+                            </span>
+                          )}
+                        </div>
+
                         {/* Client Badge */}
-                        <div className="absolute top-4 left-4 bg-lime-500/90 backdrop-blur-sm rounded-full px-3 py-1">
+                        <div className="absolute bottom-4 left-4 bg-purple-500/90 backdrop-blur-sm rounded-full px-3 py-1">
                           <div className="text-white text-sm font-medium">
                             {video.client}
                           </div>
@@ -475,17 +588,41 @@ const VideosPage = () => {
                           {video.description}
                         </p>
 
+                        {/* Categories Display */}
+                        {video.categories && video.categories.length > 0 && (
+                          <div className="mb-3">
+                            <p className="text-xs text-gray-400 mb-1">Categories:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {video.categories.map((category, catIndex) => (
+                                <span
+                                  key={catIndex}
+                                  className="px-2 py-1 bg-lime-500/10 text-lime-400 text-xs rounded-md border border-lime-500/20"
+                                >
+                                  {category}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
                         {/* Tags */}
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {video.tags.map((tag, tagIndex) => (
-                            <span
-                              key={tagIndex}
-                              className="px-2 py-1 bg-lime-500/10 text-lime-400 text-xs rounded-md border border-lime-500/20"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
+                        {video.tags && video.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {video.tags.slice(0, 3).map((tag, tagIndex) => (
+                              <span
+                                key={tagIndex}
+                                className="px-2 py-1 bg-blue-500/10 text-blue-400 text-xs rounded-md border border-blue-500/20"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                            {video.tags.length > 3 && (
+                              <span className="px-2 py-1 bg-gray-600 text-gray-300 text-xs rounded-md">
+                                +{video.tags.length - 3} more
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </motion.div>
@@ -501,14 +638,14 @@ const VideosPage = () => {
               viewport={{ once: true }}
               className="text-center mt-16"
             >
-              <motion.button
+              {/* <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 className="px-8 py-4 bg-lime-500 hover:bg-lime-600 text-white font-bold rounded-2xl transition-all duration-300 shadow-2xl hover:shadow-3xl hover:shadow-lime-500/25 flex items-center gap-3 mx-auto"
               >
                 <span>Load More Videos</span>
                 <ArrowRight className="w-5 h-5" />
-              </motion.button>
+              </motion.button> */}
             </motion.div>
           </div>
         </section>
@@ -569,24 +706,17 @@ const VideosPage = () => {
                 transition={{ delay: 0.5 }}
                 viewport={{ once: true }}
               >
-                <motion.button
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-12 py-4 bg-lime-500 hover:bg-lime-600 text-white font-bold rounded-2xl transition-all duration-300 shadow-2xl hover:shadow-3xl hover:shadow-lime-500/25 flex items-center gap-3 text-lg"
-                >
-                  <Play className="w-6 h-6" />
-                  Start Video Project
-                  <ArrowRight className="w-5 h-5" />
-                </motion.button>
-
-                <motion.button
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-12 py-4 border-2 border-lime-500 text-lime-400 hover:bg-lime-500/10 font-bold rounded-2xl transition-all duration-300 flex items-center gap-3 text-lg"
-                >
-                  <Maximize className="w-6 h-6" />
-                  View Showreel
-                </motion.button>
+                <Link href={'/contact'}>
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-12 py-4 bg-lime-500 hover:bg-lime-600 text-white font-bold rounded-2xl transition-all duration-300 shadow-2xl hover:shadow-3xl hover:shadow-lime-500/25 flex items-center gap-3 text-lg"
+                  >
+                    <Play className="w-6 h-6" />
+                    Start Video Project
+                    <ArrowRight className="w-5 h-5" />
+                  </motion.button>
+                </Link>
               </motion.div>
             </div>
           </motion.div>
@@ -634,18 +764,36 @@ const VideosPage = () => {
               <div className="mt-6">
                 <h3 className="text-2xl font-bold text-white mb-2">{selectedVideo.title}</h3>
                 <p className="text-gray-400 mb-4">{selectedVideo.description}</p>
+                
+                {/* Categories in Modal */}
+                {selectedVideo.categories && selectedVideo.categories.length > 0 && (
+                  <div className="mb-4">
+                    <p className="text-lime-400 font-semibold mb-2">Categories:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedVideo.categories.map((category, catIndex) => (
+                        <span
+                          key={catIndex}
+                          className="px-3 py-1 bg-lime-500/10 text-lime-400 text-sm rounded-lg border border-lime-500/20"
+                        >
+                          {category}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex items-center justify-between">
-                  <div className="text-lime-400 font-semibold">{selectedVideo.client}</div>
+                  <div className="text-purple-400 font-semibold">{selectedVideo.client}</div>
                   <div className="text-gray-400 text-sm">{selectedVideo.duration}</div>
                 </div>
-                
+
                 {/* Tags in Modal */}
                 {selectedVideo.tags && selectedVideo.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-4">
                     {selectedVideo.tags.map((tag, tagIndex) => (
                       <span
                         key={tagIndex}
-                        className="px-3 py-1 bg-lime-500/10 text-lime-400 text-sm rounded-lg border border-lime-500/20"
+                        className="px-3 py-1 bg-blue-500/10 text-blue-400 text-sm rounded-lg border border-blue-500/20"
                       >
                         {tag}
                       </span>

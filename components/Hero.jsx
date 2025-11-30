@@ -70,7 +70,7 @@ export default function Hero() {
             </button>
             </Link>
 
-            <Link href={'/portfolio/vidoes'}>
+            <Link href={'/portfolio/videos'}>
             <button className="px-8 py-4 backdrop-blur-sm border border-white/20 hover:border-lime-400/50 text-white font-semibold rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-lime-500/10">
               View Portfolio
             </button>

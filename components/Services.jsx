@@ -14,9 +14,9 @@ const Services = () => {
     },
     {
       icon: Cuboid,
-      title: '3D Modeling & Animation',
-      description: 'High-quality 3D models, animations, and visual effects',
-      features: ['3D Modeling', 'Character Animation', 'Visual Effects', 'Product Visualization']
+      title: '3D Rendering & Animation',
+      description: 'High-quality 3D rendering, animations, and visual effects',
+      features: ['3D Rendering', 'Character Animation', 'Visual Effects', 'Product Visualization']
     },
     {
       icon: Globe,
@@ -33,11 +33,11 @@ const Services = () => {
   ];
 
   const clients = [
-    { name: "envatio", logo: "E" },
-    { name: "envatio", logo: "E" },
-    { name: "envatio", logo: "E" },
-    { name: "envatio", logo: "E" },
-    { name: "envatio", logo: "E" }
+    { name: "outfitters", logo: "/logos/outfitters.png" },
+    { name: "ONE", logo: "/logos/one.png" },
+    { name: "devsinc", logo: "/logos/devsinc.png" },
+    // { name: "envatio", logo: "E" },
+    // { name: "envatio", logo: "E" }
   ];
 
   return (
@@ -114,7 +114,7 @@ const Services = () => {
                 GET STARTED
               </motion.button>
             </Link>
-            <Link href={'/portfolio/vidoes'}>
+            <Link href={'/portfolio/videos'}>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -140,7 +140,7 @@ const Services = () => {
               <span className="text-lime-300 text-sm font-medium">Trusted by Thousands</span>
             </div>
             <p className="text-2xl text-gray-300">
-              We've <span className="text-lime-400 font-bold">37800</span> satisfied customers with our services.
+              We've <span className="text-lime-400 font-bold">{stats[0].number}</span> satisfied customers with our services.
             </p>
           </div>
 
@@ -181,10 +181,14 @@ const Services = () => {
                 viewport={{ once: true }}
                 className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6 hover:border-lime-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-lime-500/10"
               >
-                <div className="w-20 h-20 bg-gradient-to-br from-lime-400 to-lime-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-                  {client.logo}
+                <div className="w-20 h-20  rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                  <img
+                   src={client.logo}
+                   alt={client.name}
+                   className="w-full h-full object-cover rounded-xl"
+                   />
                 </div>
-                <div className="mt-3 text-gray-300 font-medium">{client.name}</div>
+                {/* <div className="mt-3 text-gray-300 font-medium">{client.name}</div> */}
               </motion.div>
             ))}
           </div>

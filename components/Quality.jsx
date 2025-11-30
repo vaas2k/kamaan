@@ -17,10 +17,10 @@ const Quality = () => {
   ];
 
   const skills = [
-    { name: "DEVELOPMENT", percentage: 90 },
+    { name: "VIDEO EDITING", percentage: 96 },
+    { name: "DEVELOPMENT", percentage: 80 },
     { name: "ANIMATIONS", percentage: 85 },
-    { name: "VIDEO EDITING", percentage: 78 },
-    { name: "3D MODELLING", percentage: 92 }
+    { name: "3D RENDERING", percentage: 60 }
   ];
 
   return (
@@ -46,7 +46,7 @@ const Quality = () => {
             >
               <div className="w-2 h-2 bg-lime-400 rounded-full animate-pulse"></div>
               <span className="text-lime-300 text-sm font-medium tracking-wide">
-                SIGHT IN SURPRACE!
+                SIGHT IN SURPRISE!
               </span>
             </motion.div>
 

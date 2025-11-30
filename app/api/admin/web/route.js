@@ -16,15 +16,15 @@ export async function POST(request) {
   try {
     await connectDB();    
 
-    const { title, category, type, duration, thumbnail, liveUrl, githubUrl, description, client, tags, features } = await request.json();
+    const { title, categories, type, duration, thumbnail, liveUrl, githubUrl, description, client, tags, features } = await request.json();
 
-    if(!title || !category || !type || !duration || !thumbnail || !liveUrl || !githubUrl || !description || !client) {
+    if(!title || !categories || !type || !duration || !thumbnail || !liveUrl || !githubUrl || !description || !client) {
       return new Response('Missing required fields', { status: 400 });
     }
      
     await Website.create({ 
       title, 
-      category, 
+      categories, 
       type, 
       duration, 
       thumbnail, 

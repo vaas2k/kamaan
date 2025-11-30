@@ -2,7 +2,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Eye, Edit, Play, Clock, Users, X, Tag } from 'lucide-react';
+import { Plus, Trash2, Eye, Edit, Play, Clock, Users, X, Tag, ChevronDown } from 'lucide-react';
 import axios, { AxiosError } from 'axios';
 
 const VideosTab = () => {
@@ -10,12 +10,25 @@ const VideosTab = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [tagInput, setTagInput] = useState('');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
 
+  // Available categories
+  const categories = [
+    "Short form Videos",
+    "Gaming Videos",
+    "Social Media Videos",
+    "Explainer Videos",
+    "Documentaries",
+    "Motion Graphics",
+    "Ads",
+    "Music Videos",
+    "VFX"
+  ];
 
   // Form state
   const [formData, setFormData] = useState({
     title: '',
-    category: '',
+    categories: [], // Changed from category to categories (array)
     description: '',
     duration: '',
     videoUrl: '',
@@ -32,7 +45,6 @@ const VideosTab = () => {
 
   const fetchVideos = async () => {
     try {
-      // Replace with actual API call
       const response = await axios.get('/api/admin/video');
       const data = response.data;
       setVideos(data);
@@ -61,19 +73,44 @@ const VideosTab = () => {
     });
   };
 
+  // Handle category selection
+  const handleCategoryToggle = (category) => {
+    setFormData(prev => {
+      const isSelected = prev.categories.includes(category);
+      if (isSelected) {
+        return {
+          ...prev,
+          categories: prev.categories.filter(cat => cat !== category)
+        };
+      } else {
+        return {
+          ...prev,
+          categories: [...prev.categories, category]
+        };
+      }
+    });
+  };
+
+  // Select/deselect all categories
+  const handleSelectAllCategories = () => {
+    setFormData(prev => ({
+      ...prev,
+      categories: prev.categories.length === categories.length ? [] : [...categories]
+    }));
+  };
+
   const handleAddVideo = async (e) => {
     e.preventDefault();
     try {
       const req = await axios.post('/api/admin/video', formData);
 
-      if(req.status === 200) {
+      if (req.status === 200) {
         console.log('Video added successfully:', req.data);
-        // Optionally, refresh the video list
         fetchVideos();
         setShowAddForm(false);
         setFormData({
           title: '',
-          category: '',
+          categories: [],
           description: '',
           duration: '',
           videoUrl: '',
@@ -85,35 +122,29 @@ const VideosTab = () => {
         });
       }
     } catch (error) {
-      console.error('Error adding video:', error);  
-      if(error instanceof AxiosError) {
+      console.error('Error adding video:', error);
+      if (error instanceof AxiosError) {
         console.error('Axios error details:', error.response);
       }
     }
   };
 
   const handleDeleteVideo = async (id) => {
-    
     if (confirm('Are you sure you want to delete this video?')) {
-      
       try {
-
         console.log('Attempting to delete video with id:', id);
-
         const req = await axios.delete(`/api/admin/video?id=${id}`);
 
-        if(req.status === 200) {
+        if (req.status === 200) {
           console.log('Video deleted successfully:', req.data);
-          // Refresh the video list
           fetchVideos();
         }
       } catch (error) {
         console.error('Error deleting video:', error);
-        if(error instanceof AxiosError) {
+        if (error instanceof AxiosError) {
           console.error('Axios error details:', error.response);
         }
       }
-      console.log('Deleting video:', id);
     }
   };
 
@@ -164,14 +195,62 @@ const VideosTab = () => {
                   className="w-full p-3 bg-gray-700/50 border border-lime-500/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-lime-500"
                   required
                 />
-                <input
-                  type="text"
-                  placeholder="Category"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full p-3 bg-gray-700/50 border border-lime-500/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-lime-500"
-                  required
-                />
+                
+                {/* Multiple Category Selector */}
+                <div className="relative">
+                  <label className="block text-sm font-medium text-lime-400 mb-2">
+                    Categories {formData.categories.length > 0 && `(${formData.categories.length} selected)`}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                    className="w-full p-3 bg-gray-700/50 border border-lime-500/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-lime-500 flex justify-between items-center"
+                  >
+                    <span>
+                      {formData.categories.length === 0 
+                        ? "Select Categories" 
+                        : formData.categories.slice(0, 2).join(', ') + (formData.categories.length > 2 ? ` +${formData.categories.length - 2} more` : '')
+                      }
+                    </span>
+                    <ChevronDown className={`w-4 h-4 transition-transform ${showCategoryDropdown ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {/* Category Dropdown */}
+                  {showCategoryDropdown && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="absolute z-10 w-full mt-2 bg-gray-800 border border-lime-500/20 rounded-xl shadow-lg max-h-60 overflow-y-auto"
+                    >
+                      <div className="p-2 border-b border-gray-700">
+                        <button
+                          type="button"
+                          onClick={handleSelectAllCategories}
+                          className="w-full text-left px-3 py-2 text-sm text-lime-400 hover:bg-lime-500/10 rounded-lg"
+                        >
+                          {formData.categories.length === categories.length ? 'Deselect All' : 'Select All'}
+                        </button>
+                      </div>
+                      <div className="p-2 space-y-1">
+                        {categories.map((category) => (
+                          <label
+                            key={category}
+                            className="flex items-center px-3 py-2 hover:bg-gray-700/50 rounded-lg cursor-pointer"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formData.categories.includes(category)}
+                              onChange={() => handleCategoryToggle(category)}
+                              className="w-4 h-4 text-lime-500 bg-gray-700 border-gray-600 rounded focus:ring-lime-500 focus:ring-2"
+                            />
+                            <span className="ml-3 text-sm text-white">{category}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+
                 <input
                   type="text"
                   placeholder="Duration (e.g., 1:45)"
@@ -189,7 +268,7 @@ const VideosTab = () => {
                   required
                 />
               </div>
-              
+
               <textarea
                 placeholder="Description"
                 value={formData.description}
@@ -255,7 +334,7 @@ const VideosTab = () => {
                   value={formData.videoUrl}
                   onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
                   className="w-full p-3 bg-gray-700/50 border border-lime-500/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-lime-500"
-                  required
+                  // required
                 />
                 <input
                   type="url"
@@ -264,23 +343,6 @@ const VideosTab = () => {
                   onChange={(e) => setFormData({ ...formData, thumbnail: e.target.value })}
                   className="w-full p-3 bg-gray-700/50 border border-lime-500/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-lime-500"
                   required
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input
-                  type="number"
-                  placeholder="Views Count"
-                  value={formData.views}
-                  onChange={(e) => setFormData({ ...formData, views: parseInt(e.target.value) || 0 })}
-                  className="w-full p-3 bg-gray-700/50 border border-lime-500/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-lime-500"
-                />
-                <input
-                  type="number"
-                  placeholder="Likes Count"
-                  value={formData.likes}
-                  onChange={(e) => setFormData({ ...formData, likes: parseInt(e.target.value) || 0 })}
-                  className="w-full p-3 bg-gray-700/50 border border-lime-500/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-lime-500"
                 />
               </div>
 
@@ -294,7 +356,10 @@ const VideosTab = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowAddForm(false)}
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setShowCategoryDropdown(false);
+                  }}
                   className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-xl transition-colors"
                 >
                   Cancel
@@ -310,7 +375,7 @@ const VideosTab = () => {
         <AnimatePresence>
           {videos.map((video, index) => (
             <motion.div
-              key={video.id}
+              key={video._id || index}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
@@ -324,28 +389,45 @@ const VideosTab = () => {
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <div className="absolute top-3 left-3">
-                  <span className="bg-lime-500/90 text-white px-2 py-1 rounded text-xs font-medium">
-                    {video.category}
-                  </span>
+                <div className="absolute top-3 left-3 flex flex-wrap gap-1">
+                  {video.categories && video.categories.slice(0, 2).map((category, catIndex) => (
+                    <span 
+                      key={catIndex}
+                      className="bg-lime-500/90 text-white px-2 py-1 rounded text-xs font-medium"
+                    >
+                      {category}
+                    </span>
+                  ))}
+                  {video.categories && video.categories.length > 2 && (
+                    <span className="bg-lime-700/90 text-white px-2 py-1 rounded text-xs font-medium">
+                      +{video.categories.length - 2}
+                    </span>
+                  )}
                 </div>
-                {/* <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center">
-                  <div className="flex items-center gap-1 text-white text-sm">
-                    <Play className="w-3 h-3" />
-                    {video.duration}
-                  </div>
-                  <div className="flex items-center gap-1 text-white text-sm">
-                    <Eye className="w-3 h-3" />
-                    {video.views}
-                  </div>
-                </div> */}
               </div>
 
               {/* Content */}
               <div className="p-4">
                 <h3 className="font-semibold text-white mb-2 line-clamp-2">{video.title}</h3>
                 <p className="text-gray-400 text-sm mb-2">{video.client}</p>
-                
+
+                {/* Categories Display */}
+                {video.categories && video.categories.length > 0 && (
+                  <div className="mb-3">
+                    <p className="text-xs text-gray-400 mb-1">Categories:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {video.categories.map((category, catIndex) => (
+                        <span
+                          key={catIndex}
+                          className="inline-block bg-lime-500/10 text-lime-400 px-2 py-1 rounded text-xs border border-lime-500/20"
+                        >
+                          {category}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Tags Display */}
                 {video.tags && video.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1 mb-3">
@@ -364,7 +446,7 @@ const VideosTab = () => {
                     )}
                   </div>
                 )}
-                
+
                 {/* Actions */}
                 <div className="flex justify-between items-center">
                   <div className="flex gap-2">
@@ -376,14 +458,6 @@ const VideosTab = () => {
                     >
                       <Eye className="w-4 h-4" />
                     </motion.button>
-                    {/* <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      className="p-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors"
-                      title="Edit"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </motion.button> */}
                   </div>
                   <motion.button
                     onClick={() => handleDeleteVideo(video._id)}

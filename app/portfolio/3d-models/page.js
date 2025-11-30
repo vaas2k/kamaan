@@ -7,6 +7,7 @@ import {
   Maximize, Users, Star, Award, Camera, X, Clock
 } from "lucide-react";
 import axios from "axios";
+import Link from "next/link";
 
 const Models3DPage = () => {
   const [activeFilter, setActiveFilter] = useState("all");
@@ -17,15 +18,19 @@ const Models3DPage = () => {
   const [modelProjects, setModelProjects] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const filters = [
-    { id: "all", label: "All Projects" },
-    { id: "architectural", label: "Architectural" },
-    { id: "product", label: "Product" },
-    { id: "character", label: "Character" },
-    { id: "medical", label: "Medical" },
-    { id: "automotive", label: "Automotive" },
-    { id: "vfx", label: "VFX" }
-  ];
+ const filters = [
+  { id: "all", label: "All Projects" },
+  { id: "Character Animation", label: "Character Animation" },
+  { id: "Architectural Visualization", label: "Architectural" },
+  { id: "3D Floor Plans", label: "3D Floor Plans" },
+  { id: "Product Modeling", label: "Product Modeling" },
+  { id: "Character Modeling", label: "Character Modeling" },
+  { id: "Environment Design", label: "Environment" },
+  { id: "Motion Graphics", label: "Motion Graphics" },
+  { id: "VFX", label: "VFX" },
+  { id: "Game Assets", label: "Game Assets" },
+  { id: "Medical Visualization", label: "Medical" }
+];
 
   const typeIcons = {
     "visualization": Camera,
@@ -42,10 +47,17 @@ const Models3DPage = () => {
   ];
 
   // Safely get filtered models
+  // const filteredModels = activeFilter === "all"
+  //   ? modelProjects
+  //   : modelProjects.filter(model => model.category === activeFilter);
+
+
+  // Updated filtering logic to handle multiple categories
   const filteredModels = activeFilter === "all"
     ? modelProjects
-    : modelProjects.filter(model => model.category === activeFilter);
-
+    : modelProjects.filter(model =>
+      model.categories && model.categories.includes(activeFilter)
+    );
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -75,7 +87,7 @@ const Models3DPage = () => {
     // YouTube URLs
     if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
       let videoId = '';
-      
+
       // Handle different YouTube URL formats
       if (videoUrl.includes('youtube.com/watch?v=')) {
         videoId = videoUrl.split('v=')[1]?.split('&')[0];
@@ -84,7 +96,7 @@ const Models3DPage = () => {
       } else if (videoUrl.includes('youtube.com/embed/')) {
         videoId = videoUrl.split('embed/')[1]?.split('?')[0];
       }
-      
+
       if (videoId) {
         return {
           type: 'youtube',
@@ -135,17 +147,14 @@ const Models3DPage = () => {
   // Function to render video player based on source type
   const renderVideoPlayer = (model) => {
     const source = getVideoSource(model.videoUrl);
-    
+
     if (!source) {
       return (
         <div className="w-full h-96 bg-gray-800 rounded-2xl flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <X className="w-10 h-10 text-white" />
-            </div>
-            <p className="text-white text-lg">Invalid Video URL</p>
-            <p className="text-gray-400 text-sm mt-2">Unable to load video from provided URL</p>
-          </div>
+          <img
+           src={model.thumbnail}
+           className="w-full h-full object-contain"
+           />
         </div>
       );
     }
@@ -166,7 +175,7 @@ const Models3DPage = () => {
             />
           </div>
         );
-      
+
       case 'direct':
         return (
           <div className="w-full h-96 bg-black rounded-2xl overflow-hidden relative">
@@ -181,7 +190,7 @@ const Models3DPage = () => {
               <source src={source.url} type={`video/${source.url.split('.').pop()}`} />
               Your browser does not support the video tag.
             </video>
-            
+
             {/* Custom controls for direct videos */}
             <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -199,7 +208,7 @@ const Models3DPage = () => {
                 >
                   {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                 </motion.button>
-                
+
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
@@ -219,7 +228,7 @@ const Models3DPage = () => {
             </div>
           </div>
         );
-      
+
       default:
         return (
           <div className="w-full h-96 bg-gray-800 rounded-2xl flex items-center justify-center">
@@ -229,9 +238,9 @@ const Models3DPage = () => {
               </div>
               <p className="text-white text-lg">Video Player</p>
               <p className="text-gray-400 text-sm mt-2">{model.title}</p>
-              <a 
-                href={model.videoUrl} 
-                target="_blank" 
+              <a
+                href={model.videoUrl}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block mt-4 px-4 py-2 bg-lime-500 text-white rounded-lg hover:bg-lime-600 transition-colors"
               >
@@ -372,7 +381,7 @@ const Models3DPage = () => {
               variants={itemVariants}
               className="text-xl md:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed font-light"
             >
-              Explore our collection of stunning 3D models and animations created with{" "}
+              Explore our collection of stunning 3D projects and animations created with{" "}
               <span className="text-lime-400 font-semibold">cutting-edge technology and artistic vision</span>
             </motion.p>
 
@@ -429,11 +438,10 @@ const Models3DPage = () => {
               <motion.button
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
-                className={`px-6 py-3 rounded-full border backdrop-blur-sm transition-all duration-500 flex items-center gap-2 ${
-                  activeFilter === filter.id
+                className={`px-6 py-3 rounded-full border backdrop-blur-sm transition-all duration-500 flex items-center gap-2 ${activeFilter === filter.id
                     ? "bg-lime-500/20 border-lime-500 text-lime-400 shadow-2xl shadow-lime-500/25"
                     : "bg-gray-900/50 border-gray-600 text-gray-400 hover:border-lime-500/50 hover:text-lime-300"
-                }`}
+                  }`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -608,14 +616,14 @@ const Models3DPage = () => {
             viewport={{ once: true }}
             className="text-center mt-16"
           >
-            <motion.button
+            {/* <motion.button
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               className="px-8 py-4 bg-lime-500 hover:bg-lime-600 text-white font-bold rounded-2xl transition-all duration-300 shadow-2xl hover:shadow-3xl hover:shadow-lime-500/25 flex items-center gap-3 mx-auto"
             >
               <span>Load More Projects</span>
               <ArrowRight className="w-5 h-5" />
-            </motion.button>
+            </motion.button> */}
           </motion.div>
         </div>
       </section>
@@ -675,24 +683,18 @@ const Models3DPage = () => {
                 transition={{ delay: 0.5 }}
                 viewport={{ once: true }}
               >
-                <motion.button
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-12 py-4 bg-lime-500 hover:bg-lime-600 text-white font-bold rounded-2xl transition-all duration-300 shadow-2xl hover:shadow-3xl hover:shadow-lime-500/25 flex items-center gap-3 text-lg"
-                >
-                  <Cuboid className="w-6 h-6" />
-                  Start 3D Project
-                  <ArrowRight className="w-5 h-5" />
-                </motion.button>
+                <Link href={'/contact'}>
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-12 py-4 bg-lime-500 hover:bg-lime-600 text-white font-bold rounded-2xl transition-all duration-300 shadow-2xl hover:shadow-3xl hover:shadow-lime-500/25 flex items-center gap-3 text-lg"
+                  >
+                    <Cuboid className="w-6 h-6" />
+                    Start 3D Project
+                    <ArrowRight className="w-5 h-5" />
+                  </motion.button>
+                </Link>
 
-                <motion.button
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-12 py-4 border-2 border-lime-500 text-lime-400 hover:bg-lime-500/10 font-bold rounded-2xl transition-all duration-300 flex items-center gap-3 text-lg"
-                >
-                  <Play className="w-6 h-6" />
-                  View Showreel
-                </motion.button>
               </motion.div>
             </div>
           </motion.div>
@@ -744,7 +746,7 @@ const Models3DPage = () => {
                   <div className="text-lime-400 font-semibold">{selectedModel.client}</div>
                   <div className="text-gray-400 text-sm">{selectedModel.duration}</div>
                 </div>
-                
+
                 {/* Technical Info */}
                 <div className="grid grid-cols-2 gap-4 mt-6">
                   <div className="bg-gray-800/50 rounded-xl p-4 text-center">

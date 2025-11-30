@@ -1,12 +1,13 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  ExternalLink, Github, ArrowRight, Sparkles, Filter, 
+import {
+  ExternalLink, Github, ArrowRight, Sparkles, Filter,
   Eye, Heart, Share2, Zap, Star, Users, Clock,
   Smartphone, Monitor, Globe, Code, X
 } from "lucide-react";
 import axios from "axios";
+import Link from "next/link";
 
 const WebsitesPage = () => {
   const [activeFilter, setActiveFilter] = useState("all");
@@ -17,12 +18,15 @@ const WebsitesPage = () => {
 
   const filters = [
     { id: "all", label: "All Projects" },
-    { id: "ecommerce", label: "E-Commerce" },
-    { id: "corporate", label: "Corporate" },
-    { id: "portfolio", label: "Portfolio" },
-    { id: "saas", label: "SaaS" },
-    { id: "restaurant", label: "Restaurant" },
-    { id: "mobile", label: "Mobile" }
+    { id: "E-Commerce", label: "E-Commerce" },
+    { id: "Portfolio Websites", label: "Portfolio" },
+    { id: "Blogs Websites", label: "Blogs" },
+    { id: "Business Websites", label: "Business" },
+    { id: "Educational Platforms", label: "Educational" },
+    { id: "Social Media Apps", label: "Social Media" },
+    { id: "Dashboard & Analytics", label: "Dashboard" },
+    { id: "SAAS Products", label: "SAAS" },
+    { id: "Landing Pages", label: "Landing Pages" }
   ];
 
   const typeIcons = {
@@ -39,9 +43,11 @@ const WebsitesPage = () => {
     { number: "50+", label: "Technologies", icon: Zap }
   ];
 
-  const filteredWebsites = activeFilter === "all" 
-    ? websiteProjects 
-    : websiteProjects.filter(website => website.category === activeFilter);
+  const filteredWebsites = activeFilter === "all"
+    ? websiteProjects
+    : websiteProjects.filter(website =>
+      website.categories && website.categories.includes(activeFilter)
+    );
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -64,7 +70,6 @@ const WebsitesPage = () => {
       }
     }
   };
-
   // Safe data access functions
   const getFeatures = (website) => {
     if (!website.features) return [];
@@ -74,6 +79,11 @@ const WebsitesPage = () => {
   const getTags = (website) => {
     if (!website.tags) return [];
     return Array.isArray(website.tags) ? website.tags : [website.tags];
+  };
+
+  const getCategories = (website) => {
+    if (!website.categories) return [];
+    return Array.isArray(website.categories) ? website.categories : [website.categories];
   };
 
   const getTypeIcon = (website) => {
@@ -172,16 +182,16 @@ const WebsitesPage = () => {
               WEB
               <motion.span
                 className="block bg-clip-text text-transparent bg-gradient-to-r from-lime-300 via-lime-400 to-lime-600"
-                animate={{ 
-                  backgroundPosition: ["0%", "100%", "0%"] 
+                animate={{
+                  backgroundPosition: ["0%", "100%", "0%"]
                 }}
-                transition={{ 
-                  duration: 5, 
+                transition={{
+                  duration: 5,
                   repeat: Infinity,
                   repeatType: "reverse"
                 }}
-                style={{ 
-                  backgroundSize: "200% 100%" 
+                style={{
+                  backgroundSize: "200% 100%"
                 }}
               >
                 PROJECTS
@@ -250,11 +260,10 @@ const WebsitesPage = () => {
               <motion.button
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
-                className={`px-6 py-3 rounded-full border backdrop-blur-sm transition-all duration-500 flex items-center gap-2 ${
-                  activeFilter === filter.id
+                className={`px-6 py-3 rounded-full border backdrop-blur-sm transition-all duration-500 flex items-center gap-2 ${activeFilter === filter.id
                     ? "bg-lime-500/20 border-lime-500 text-lime-400 shadow-2xl shadow-lime-500/25"
                     : "bg-gray-900/50 border-gray-600 text-gray-400 hover:border-lime-500/50 hover:text-lime-300"
-                }`}
+                  }`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -296,10 +305,10 @@ const WebsitesPage = () => {
                           alt={website.title}
                           className="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-500"
                         />
-                        
+
                         {/* Overlay */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        
+
                         {/* Action Buttons */}
                         <motion.div
                           className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300"
@@ -352,7 +361,7 @@ const WebsitesPage = () => {
                         <h3 className="text-xl font-bold text-white mb-3 group-hover:text-lime-300 transition-colors duration-300 line-clamp-2">
                           {website.title}
                         </h3>
-                        
+
                         <p className="text-gray-400 text-sm mb-4 line-clamp-2">
                           {website.description}
                         </p>
@@ -390,6 +399,22 @@ const WebsitesPage = () => {
                                 {tag}
                               </span>
                             ))}
+                          </div>
+                        )}
+                        {/* Categories Display */}
+                        {getCategories(website).length > 0 && (
+                          <div className="mb-3">
+                            <p className="text-xs text-gray-400 mb-1">Categories:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {getCategories(website).map((category, catIndex) => (
+                                <span
+                                  key={catIndex}
+                                  className="px-2 py-1 bg-lime-500/10 text-lime-400 text-xs rounded-md border border-lime-500/20"
+                                >
+                                  {category}
+                                </span>
+                              ))}
+                            </div>
                           </div>
                         )}
 
@@ -433,14 +458,14 @@ const WebsitesPage = () => {
             viewport={{ once: true }}
             className="text-center mt-16"
           >
-            <motion.button
+            {/* <motion.button
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               className="px-8 py-4 bg-lime-500 hover:bg-lime-600 text-white font-bold rounded-2xl transition-all duration-300 shadow-2xl hover:shadow-3xl hover:shadow-lime-500/25 flex items-center gap-3 mx-auto"
             >
               <span>Load More Projects</span>
               <ArrowRight className="w-5 h-5" />
-            </motion.button>
+            </motion.button> */}
           </motion.div>
         </div>
       </section>
@@ -467,11 +492,11 @@ const WebsitesPage = () => {
               }}
               className="absolute inset-0 bg-gradient-to-r from-lime-500/10 to-blue-500/10 rounded-3xl blur-3xl"
             />
-            
+
             <div className="relative bg-gray-900/50 backdrop-blur-sm border border-lime-500/20 rounded-3xl p-12 shadow-2xl">
               <motion.h2
                 className="text-5xl md:text-7xl font-black text-white mb-8"
-                animate={{ 
+                animate={{
                   textShadow: [
                     "0 0 20px rgba(163, 230, 53, 0.5)",
                     "0 0 40px rgba(163, 230, 53, 0.8)",
@@ -482,7 +507,7 @@ const WebsitesPage = () => {
               >
                 READY TO <span className="text-lime-400">BUILD</span>?
               </motion.h2>
-              
+
               <motion.p
                 className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto"
                 initial={{ opacity: 0 }}
@@ -500,24 +525,18 @@ const WebsitesPage = () => {
                 transition={{ delay: 0.5 }}
                 viewport={{ once: true }}
               >
-                <motion.button
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-12 py-4 bg-lime-500 hover:bg-lime-600 text-white font-bold rounded-2xl transition-all duration-300 shadow-2xl hover:shadow-3xl hover:shadow-lime-500/25 flex items-center gap-3 text-lg"
-                >
-                  <Code className="w-6 h-6" />
-                  Start Web Project
-                  <ArrowRight className="w-5 h-5" />
-                </motion.button>
-                
-                <motion.button
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-12 py-4 border-2 border-lime-500 text-lime-400 hover:bg-lime-500/10 font-bold rounded-2xl transition-all duration-300 flex items-center gap-3 text-lg"
-                >
-                  <Globe className="w-6 h-6" />
-                  View Case Studies
-                </motion.button>
+                <Link href={'/contact'}>
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-12 py-4 bg-lime-500 hover:bg-lime-600 text-white font-bold rounded-2xl transition-all duration-300 shadow-2xl hover:shadow-3xl hover:shadow-lime-500/25 flex items-center gap-3 text-lg"
+                  >
+                    <Code className="w-6 h-6" />
+                    Start Web Project
+                    <ArrowRight className="w-5 h-5" />
+                  </motion.button>
+                </Link>
+
               </motion.div>
             </div>
           </motion.div>

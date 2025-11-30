@@ -90,7 +90,7 @@ const Navbar = () => {
                             <DropdownMenuSeparator className='bg-gray-100' />
                              <Link href={'/portfolio/3d-models'}>
                             <div className='text-center cursor-pointer py-2.5 text-sm rounded-lg hover:bg-lime-600 hover:text-white transition-colors'>
-                                3D Models
+                                3D Renderings
                             </div>
                              </Link>                              
                         </DropdownMenuContent>
@@ -124,7 +124,7 @@ const Navbar = () => {
                         <div className={`font-semibold text-[14px] tracking-tight ${
                             isScrolled ? 'text-white' : 'text-white'
                         }`}>
-                            +92 (349) 245 0349
+                            +92 (339) 245 0349
                         </div>
                     </div>
                 </div>

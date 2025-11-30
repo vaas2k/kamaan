@@ -18,7 +18,7 @@ export async function POST(request) {
 
     const { 
       title, 
-      category, 
+      categories, 
       type, 
       duration, 
       thumbnail, 
@@ -31,17 +31,17 @@ export async function POST(request) {
       renderTime 
     } = await request.json();
 
-    if(!title || !category || !type || !duration || !thumbnail || !videoUrl || !description) {
+    if(!title || !categories || !type || !duration || !thumbnail  || !description) {
       return new Response('Missing required fields', { status: 400 });
     }
      
     await model3D.create({ 
       title, 
-      category, 
+      categories, 
       type, 
       duration, 
       thumbnail, 
-      videoUrl, 
+      videoUrl : videoUrl || null , 
       description, 
       client: client || '', 
       tags: tags || [], 

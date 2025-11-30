@@ -82,9 +82,9 @@ const Page = () => {
         },
         {
             icon: Cuboid,
-            title: '3D Modeling & Animation',
-            description: 'High-quality 3D models, animations, and visual effects',
-            features: ['3D Modeling', 'Character Animation', 'Visual Effects', 'Product Visualization']
+            title: '3D Rendering & Animation',
+            description: 'High-quality 3D rendering, animations, and visual effects',
+            features: ['3D Rendering', 'Character Animation', 'Visual Effects', 'Product Visualization']
         },
         {
             icon: Globe,
@@ -404,7 +404,7 @@ const Page = () => {
                                     </div>
                                     <div>
                                         <h3 className="text-white font-semibold">Phone</h3>
-                                        <p className="text-gray-300">+1 (555) 123-4567</p>
+                                        <p className="text-gray-300">+92 (339) 245 0349</p>
                                     </div>
                                 </motion.div>
 
@@ -417,7 +417,7 @@ const Page = () => {
                                     </div>
                                     <div>
                                         <h3 className="text-white font-semibold">Email</h3>
-                                        <p className="text-gray-300">hello@kamaandigital.com</p>
+                                        <p className="text-gray-300">contact@thekamaan.com</p>
                                     </div>
                                 </motion.div>
 

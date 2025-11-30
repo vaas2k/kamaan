@@ -34,9 +34,16 @@ const Footer = () => {
               whileInView={{ opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.6 }}
               viewport={{ once: true }}
-              className="text-4xl font-bold text-white mb-6"
+              className=" flex gap-x-2 items-center text-4xl font-bold text-white mb-6"
             >
-              KAMAAN
+              <img 
+                    src={'/images/logo.png'} 
+                    alt="Logo" 
+                    // width={40} 
+                    // height={40}
+                    className=' w-10 h-10 transition-transform duration-200 hover:scale-105' 
+                    />
+                    KAMAAN
             </motion.h1>
 
             {/* Description */}
@@ -46,7 +53,8 @@ const Footer = () => {
               transition={{ delay: 0.4, duration: 0.6 }}
               viewport={{ once: true }}
               className="text-gray-400 text-lg leading-relaxed max-w-2xl mb-6"
-            >
+              >
+              
               WELCOME TO OUR DIGITAL AGENCY. THE BEST EXPERIENCE.
             </motion.p>
 
@@ -147,7 +155,7 @@ const Footer = () => {
                     href="tel:+923492450349"
                     className="text-white hover:text-lime-400 transition-colors duration-300"
                   >
-                    +92 3492450349
+                    +92 3392450349
                   </a>
                 </div>
               </motion.div>
@@ -192,7 +200,7 @@ const Footer = () => {
           className="text-center"
         >
           <p className="text-gray-400 text-sm">
-            © {currentYear} Copyrights by{" "}
+            © {currentYear} Powered by{" "}
             <a 
               href="https://synwavesolutions.com" 
               target="_blank" 

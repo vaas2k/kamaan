@@ -2,7 +2,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Eye, Edit, Cuboid, Play, Zap, Cpu, X, Tag } from 'lucide-react';
+import { Plus, Trash2, Eye, Edit, Cuboid, Play, Zap, Cpu, X, Tag, ChevronDown } from 'lucide-react';
 import axios, { AxiosError } from 'axios';
 
 const ModelsTab = () => {
@@ -11,11 +11,26 @@ const ModelsTab = () => {
   const [loading, setLoading] = useState(true);
   const [tagInput, setTagInput] = useState('');
   const [featureInput, setFeatureInput] = useState('');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+
+  // Available categories
+  const categories = [
+    "Character Animation",
+    "Architectural Visualization",
+    "3D Floor Plans",
+    "Product Modeling",
+    "Character Modeling",
+    "Environment Design",
+    "Motion Graphics",
+    "VFX",
+    "Game Assets",
+    "Medical Visualization"
+  ];
 
   // Form state
   const [formData, setFormData] = useState({
     title: '',
-    category: '',
+    categories: [], // Changed from category to categories (array)
     type: '',
     duration: '',
     thumbnail: '',
@@ -80,18 +95,44 @@ const ModelsTab = () => {
     });
   };
 
+  // Handle category selection
+  const handleCategoryToggle = (category) => {
+    setFormData(prev => {
+      const isSelected = prev.categories.includes(category);
+      if (isSelected) {
+        return {
+          ...prev,
+          categories: prev.categories.filter(cat => cat !== category)
+        };
+      } else {
+        return {
+          ...prev,
+          categories: [...prev.categories, category]
+        };
+      }
+    });
+  };
+
+  // Select/deselect all categories
+  const handleSelectAllCategories = () => {
+    setFormData(prev => ({
+      ...prev,
+      categories: prev.categories.length === categories.length ? [] : [...categories]
+    }));
+  };
+
   const handleAddModel = async (e) => {
     e.preventDefault();
     try {
       const req = await axios.post('/api/admin/model3d', formData);
 
-      if(req.status === 200) {
+      if (req.status === 200) {
         console.log('3D Model added successfully:', req.data);
         fetchModels();
         setShowAddForm(false);
         setFormData({
           title: '',
-          category: '',
+          categories: [],
           type: '',
           duration: '',
           thumbnail: '',
@@ -105,8 +146,8 @@ const ModelsTab = () => {
         });
       }
     } catch (error) {
-      console.error('Error adding 3D model:', error);  
-      if(error instanceof AxiosError) {
+      console.error('Error adding 3D model:', error);
+      if (error instanceof AxiosError) {
         console.error('Axios error details:', error.response);
       }
     }
@@ -118,13 +159,13 @@ const ModelsTab = () => {
         console.log('Attempting to delete 3D model with id:', id);
         const req = await axios.delete(`/api/admin/model3d?id=${id}`);
 
-        if(req.status === 200) {
+        if (req.status === 200) {
           console.log('3D Model deleted successfully:', req.data);
           fetchModels();
         }
       } catch (error) {
         console.error('Error deleting 3D model:', error);
-        if(error instanceof AxiosError) {
+        if (error instanceof AxiosError) {
           console.error('Axios error details:', error.response);
         }
       }
@@ -178,22 +219,74 @@ const ModelsTab = () => {
                   className="w-full p-3 bg-gray-700/50 border border-lime-500/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-lime-500"
                   required
                 />
-                <input
-                  type="text"
-                  placeholder="Category (architectural, product, character, etc.)"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full p-3 bg-gray-700/50 border border-lime-500/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-lime-500"
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Type (visualization, modeling, animation)"
+                
+                {/* Multiple Category Selector */}
+                <div className="relative">
+                  <label className="block text-sm font-medium text-lime-400 mb-2">
+                    Categories {formData.categories.length > 0 && `(${formData.categories.length} selected)`}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                    className="w-full p-3 bg-gray-700/50 border border-lime-500/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-lime-500 flex justify-between items-center"
+                  >
+                    <span>
+                      {formData.categories.length === 0 
+                        ? "Select Categories" 
+                        : formData.categories.slice(0, 2).join(', ') + (formData.categories.length > 2 ? ` +${formData.categories.length - 2} more` : '')
+                      }
+                    </span>
+                    <ChevronDown className={`w-4 h-4 transition-transform ${showCategoryDropdown ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {/* Category Dropdown */}
+                  {showCategoryDropdown && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="absolute z-10 w-full mt-2 bg-gray-800 border border-lime-500/20 rounded-xl shadow-lg max-h-60 overflow-y-auto"
+                    >
+                      <div className="p-2 border-b border-gray-700">
+                        <button
+                          type="button"
+                          onClick={handleSelectAllCategories}
+                          className="w-full text-left px-3 py-2 text-sm text-lime-400 hover:bg-lime-500/10 rounded-lg"
+                        >
+                          {formData.categories.length === categories.length ? 'Deselect All' : 'Select All'}
+                        </button>
+                      </div>
+                      <div className="p-2 space-y-1">
+                        {categories.map((category) => (
+                          <label
+                            key={category}
+                            className="flex items-center px-3 py-2 hover:bg-gray-700/50 rounded-lg cursor-pointer"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formData.categories.includes(category)}
+                              onChange={() => handleCategoryToggle(category)}
+                              className="w-4 h-4 text-lime-500 bg-gray-700 border-gray-600 rounded focus:ring-lime-500 focus:ring-2"
+                            />
+                            <span className="ml-3 text-sm text-white">{category}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+
+                <select
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                   className="w-full p-3 bg-gray-700/50 border border-lime-500/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-lime-500"
                   required
-                />
+                >
+                  <option value="">Select Type</option>
+                  <option value="Visualization">Visualization</option>
+                  <option value="Modeling">Modeling</option>
+                  <option value="Animation">Animation</option>
+                  <option value="Rendering">Rendering</option>
+                </select>
                 <input
                   type="text"
                   placeholder="Duration (e.g., 3 weeks)"
@@ -211,7 +304,7 @@ const ModelsTab = () => {
                   value={formData.videoUrl}
                   onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
                   className="w-full p-3 bg-gray-700/50 border border-lime-500/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-lime-500"
-                  required
+                  
                 />
                 <input
                   type="url"
@@ -249,7 +342,7 @@ const ModelsTab = () => {
                   className="w-full p-3 bg-gray-700/50 border border-lime-500/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-lime-500"
                 />
               </div>
-              
+
               <textarea
                 placeholder="Description"
                 value={formData.description}
@@ -367,7 +460,10 @@ const ModelsTab = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowAddForm(false)}
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setShowCategoryDropdown(false);
+                  }}
                   className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-xl transition-colors"
                 >
                   Cancel
@@ -398,9 +494,21 @@ const ModelsTab = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 <div className="absolute top-3 left-3 flex flex-col gap-1">
-                  <span className="bg-lime-500/90 text-white px-2 py-1 rounded text-xs font-medium">
-                    {model.category}
-                  </span>
+                  {model.categories && model.categories.slice(0, 2).map((category, catIndex) => (
+                    <span 
+                      key={catIndex}
+                      className="bg-lime-500/90 text-white px-2 py-1 rounded text-xs font-medium"
+                    >
+                      {category}
+                    </span>
+                  ))}
+                  {model.categories && model.categories.length > 2 && (
+                    <span className="bg-lime-700/90 text-white px-2 py-1 rounded text-xs font-medium">
+                      +{model.categories.length - 2}
+                    </span>
+                  )}
+                </div>
+                <div className="absolute top-3 right-3">
                   <span className="bg-blue-500/90 text-white px-2 py-1 rounded text-xs font-medium">
                     {model.type}
                   </span>
@@ -421,7 +529,24 @@ const ModelsTab = () => {
               <div className="p-4">
                 <h3 className="font-semibold text-white mb-2 line-clamp-2">{model.title}</h3>
                 <p className="text-gray-400 text-sm mb-2">{model.client}</p>
-                
+
+                {/* Categories Display */}
+                {model.categories && model.categories.length > 0 && (
+                  <div className="mb-2">
+                    <p className="text-xs text-gray-400 mb-1">Categories:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {model.categories.map((category, catIndex) => (
+                        <span
+                          key={catIndex}
+                          className="inline-block bg-lime-500/10 text-lime-400 px-2 py-1 rounded text-xs border border-lime-500/20"
+                        >
+                          {category}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Tags Display */}
                 {model.tags && model.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1 mb-2">
@@ -467,7 +592,7 @@ const ModelsTab = () => {
                     {model.duration}
                   </span>
                 </div>
-                
+
                 {/* Actions */}
                 <div className="flex justify-between items-center">
                   <div className="flex gap-2">

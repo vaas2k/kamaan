@@ -38,9 +38,9 @@ const ServicesPage = () => {
         },
         {
             icon: Cuboid,
-            title: "3D MODELING & ANIMATION",
-            description: "Create immersive 3D experiences with detailed modeling, texturing, and realistic animations for various applications.",
-            features: ["3D Modeling", "Texturing", "Animation", "Rendering", "AR/VR Integration"],
+            title: "3D RENDERING & ANIMATION",
+            description: "Create immersive 3D experiences with detailed rendering, texturing, and realistic animations for various applications.",
+            features: ["3D RENDERING", "Texturing", "Animation", "Rendering", "AR/VR Integration"],
             image: "https://images.unsplash.com/photo-1653590590390-771cf729ec44?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
             gradient: "from-orange-500/20 to-lime-500/20",
             projects: [
@@ -48,18 +48,18 @@ const ServicesPage = () => {
                 { name: "Architectural Render", image: "https://images.unsplash.com/photo-1726219835979-7b0680dd822d?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" }
             ]
         },
-        {
-            icon: Palette,
-            title: "GRAPHIC DESIGN & BRANDING",
-            description: "Complete branding solutions including logo design, marketing materials, and visual identity development.",
-            features: ["Logo Design", "Brand Identity", "Print Materials", "Social Media Graphics", "UI/UX Design"],
-            image: "https://images.unsplash.com/photo-1634942537034-2531766767d1?w=600&auto=format&fit=crop&q=60",
-            gradient: "from-pink-500/20 to-lime-500/20",
-            projects: [
-                { name: "Brand Identity", image: "https://images.unsplash.com/photo-1634942537034-2531766767d1?w=300&auto=format&fit=crop&q=60" },
-                { name: "Marketing Kit", image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=300&auto=format&fit=crop&q=60" }
-            ]
-        }
+        // {
+        //     icon: Palette,
+        //     title: "GRAPHIC DESIGN & BRANDING",
+        //     description: "Complete branding solutions including logo design, marketing materials, and visual identity development.",
+        //     features: ["Logo Design", "Brand Identity", "Print Materials", "Social Media Graphics", "UI/UX Design"],
+        //     image: "https://images.unsplash.com/photo-1634942537034-2531766767d1?w=600&auto=format&fit=crop&q=60",
+        //     gradient: "from-pink-500/20 to-lime-500/20",
+        //     projects: [
+        //         { name: "Brand Identity", image: "https://images.unsplash.com/photo-1634942537034-2531766767d1?w=300&auto=format&fit=crop&q=60" },
+        //         { name: "Marketing Kit", image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=300&auto=format&fit=crop&q=60" }
+        //     ]
+        // }
     ];
 
     const stats = [
@@ -522,7 +522,7 @@ const ServicesPage = () => {
                                 }}
                                 transition={{ duration: 2, repeat: Infinity }}
                             >
-                                +92 (349) 245 0349
+                                +92 (339) 245 0349
                             </motion.div>
 
                             <p className="text-gray-400 text-sm">

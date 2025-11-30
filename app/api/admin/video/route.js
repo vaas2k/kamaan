@@ -1,42 +1,50 @@
+// app/api/admin/video/route.js
 import connectDB from "@/lib/database/db";
 import Video from "@/lib/database/models/videos";
-
 
 export async function GET() {
   try {
     await connectDB();    
-    const videos =  await Video.find().sort({ createdAt: -1 });    
+    const videos = await Video.find().sort({ createdAt: -1 });    
     return new Response(JSON.stringify(videos), { status: 200 });
   } catch (error) {
     return new Response('Internal Server Error', { status: 500 });
   }
 }
 
-export async function POST(request, response) {
-  try{
-
+export async function POST(request) {
+  try {
     await connectDB();    
 
-    const { title, category, description, duration, videoUrl, thumbnail, client, tags } = await request.json();
+    const { title, categories, description, duration, videoUrl, thumbnail, client, tags, views, likes } = await request.json();
 
-    if(!title || !category || !description || !duration || !videoUrl || !thumbnail || !client || !tags){
+    if (!title || !categories || !description || !duration || !thumbnail || !client) {
       return new Response('Missing required fields', { status: 400 });
     }
      
-    // console.log('Adding video:', { title, category, description, duration, videoUrl, thumbnail, client, tags });  
-    await Video.create({ title, category, description, duration, videoUrl, thumbnail, client ,tags});
-
+    await Video.create({ 
+      title, 
+      categories, // Updated to use categories array
+      description, 
+      duration, 
+      videoUrl : videoUrl || null , 
+      thumbnail, 
+      client, 
+      tags,
+      views: views || 0,
+      likes: likes || 0
+    });
 
     return new Response("Video added successfully", { status: 200 });
 
-  } catch(err) { 
+  } catch (err) { 
     console.error('Error adding video:', err);
     return new Response('Internal Server Error', { status: 500 });
   } 
 }
 
 export async function DELETE(request) {
-  try{
+  try {
     await connectDB();    
 
     const { searchParams } = new URL(request.url);
@@ -48,7 +56,7 @@ export async function DELETE(request) {
     
     return new Response("Video deleted successfully", { status: 200 });
 
-  }catch(error) {
+  } catch (error) {
     return new Response('Internal Server Error', { status: 500 });
   }
 }

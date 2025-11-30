@@ -9,10 +9,10 @@ const Team = () => {
     {
       id: 1,
       name: "Kazim Hassani",
-      role: "Founder - Creative Director & VFX Artist",
+      role: "Founder - Video Editor - Game Dev - 3D",
       // description: "Leading our creative vision with 8+ years in 3D animation and visual storytelling. Specializes in character design and cinematic animations.",
-      image: "/team/kazim.png",
-      technologies: ["Blender", "Maya", "After Effects", "Cinema 4D"],
+      image: "/team/kazim.jpg",
+      technologies: ["Blender", "Premire Pro", "Unreal Engine"],
       social: {
         linkedin: "#",
         github: "#",
@@ -21,34 +21,33 @@ const Team = () => {
       featured: true
     },
     {
-      id: 2,
-      name: "Ibrahim ",
-      role: "Lead Video Editor",
-      // description: "Expert in post-production with a keen eye for storytelling. Transforms raw footage into compelling visual narratives.",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b789?w=400&h=400&fit=crop&crop=face&q=80",
-      technologies: ["Premiere Pro", "DaVinci Resolve", "Final Cut Pro", "After Effects"],
+      id: 1,
+      name: "Muhammad Ibrahim",
+      role: "Video Editor - Designer",
+      // description: "Leading our creative vision with 8+ years in 3D animation and visual storytelling. Specializes in character design and cinematic animations.",
+      image: "/team/ibrahim.jpg",
+      technologies: ["Premire Pro", "Capcut Pro", "Davincii"],
       social: {
         linkedin: "#",
         github: "#",
-        email: "sarah@kamaan.com"
+        email: "alex@kamaan.com"
       },
       featured: true
     },
-    {
-      id: 3,
-      name: "Marcus Rodriguez",
-      role: "Full-Stack Developer",
-      // description: "Builds scalable web applications with cutting-edge technologies. Passionate about performance and user experience.",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face&q=80",
-      technologies: ["React", "Node.js", "Next.js", "TypeScript"],
+     {
+      id: 1,
+      name: "Malik Ismail",
+      role: "Web Developer",
+      // description: "Leading our creative vision with 8+ years in 3D animation and visual storytelling. Specializes in character design and cinematic animations.",
+      image: "/team/ibrahim.jpg",
+      technologies: ["ReactJS", "NextJS", "Typescript"],
       social: {
         linkedin: "#",
         github: "#",
-        email: "marcus@kamaan.com"
+        email: "alex@kamaan.com"
       },
       featured: true
-    },
-    
+    }, 
   ];
 
   const stats = [
@@ -161,9 +160,9 @@ const Team = () => {
           viewport={{ once: true }}
           className="mb-20"
         >
-          <h3 className="text-2xl md:text-3xl font-bold text-white text-center mb-8">
+          {/* <h3 className="text-2xl md:text-3xl font-bold text-white text-center mb-8">
             Our <span className="text-lime-400">Expert</span> Team
-          </h3>
+          </h3> */}
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {teamMembers.filter(member => !member.featured).map((member, index) => (
@@ -250,13 +249,14 @@ const TeamMemberCard = ({ member, index, featured }) => {
       transition={{ duration: 0.6, delay: index * 0.1 }}
       viewport={{ once: true }}
       className="group relative"
+      key={index}
     >
       <div className={`bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl overflow-hidden hover:border-lime-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-lime-500/10 h-full flex flex-col ${
         featured ? 'md:min-h-[500px]' : ''
       }`}>
         
         {/* Image Container - Always show full image */}
-        <div className="relative w-full pt-[100%] overflow-hidden"> {/* Square aspect ratio */}
+        <div className="relative w-full pt-[100%] overflow-hidden "> {/* Square aspect ratio */}
           <motion.img
             src={member.image}
             alt={member.name}
@@ -269,17 +269,17 @@ const TeamMemberCard = ({ member, index, featured }) => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
           
           {/* Featured Badge */}
-          {featured && (
+          {/* {featured && (
             <div className="absolute top-4 left-4">
               <span className="px-3 py-1 bg-lime-500/90 text-white text-xs font-medium rounded-full backdrop-blur-sm flex items-center gap-1">
                 <Sparkles className="w-3 h-3" />
                 Lead
               </span>
             </div>
-          )}
+          )} */}
 
           {/* Social Links */}
-          <div className="absolute bottom-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
+          {/* <div className="absolute bottom-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
             <motion.a
               href={member.social.linkedin}
               whileHover={{ scale: 1.1 }}
@@ -304,7 +304,7 @@ const TeamMemberCard = ({ member, index, featured }) => {
             >
               <Mail size={16} className="text-white" />
             </motion.a>
-          </div>
+          </div> */}
         </div>
 
         {/* Content */}
@@ -333,7 +333,7 @@ const TeamMemberCard = ({ member, index, featured }) => {
           </div>
 
           {/* Contact Button */}
-          <motion.a
+          {/* <motion.a
             href={`mailto:${member.social.email}`}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -341,7 +341,7 @@ const TeamMemberCard = ({ member, index, featured }) => {
           >
             <span>Contact {member.name.split(' ')[0]}</span>
             <Mail size={16} className="transform group-hover/btn:scale-110 transition-transform" />
-          </motion.a>
+          </motion.a> */}
         </div>
       </div>
     </motion.div>
