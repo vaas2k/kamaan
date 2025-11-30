@@ -17,7 +17,7 @@ const Navbar = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false)
     const pathname = usePathname()
 
-    // Handle scroll effect
+    // Handle scroll effect - only for desktop
     useEffect(() => {
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 50)
@@ -81,14 +81,22 @@ const Navbar = () => {
         return pathname.startsWith(href)
     }
 
+    // For mobile, always use solid background, for desktop use conditional background
+    const getNavbarBackground = () => {
+        // On mobile (lg:hidden), always use solid background
+        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+            return 'bg-gray-900/95 backdrop-blur-md shadow-lg'
+        }
+        // On desktop, use transparent when not scrolled
+        return isScrolled 
+            ? 'bg-gray-900/95 backdrop-blur-md shadow-lg' 
+            : 'bg-transparent'
+    }
+
     return (
         <>
             <nav 
-                className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-                    isScrolled 
-                        ? 'bg-gray-900/95 backdrop-blur-md shadow-lg' 
-                        : 'bg-transparent'
-                }`}
+                className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${getNavbarBackground()}`}
                 role="navigation"
                 aria-label="Main navigation"
             >
@@ -310,4 +318,4 @@ const Navbar = () => {
     )
 }
 
-export default Navbar;
+export default Navbar
