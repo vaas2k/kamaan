@@ -37,12 +37,7 @@ export default function Home() {
       <section id="testimonials">
         <Testimonials />
       </section>
-      
-      {/* Contact Section - You might want to add a dedicated contact section */}
-      <section id="contact">
-        {/* You can add your contact form component here */}
-        {/* <div className="min-h-[200px] bg-gradient-to-b from-gray-900 to-black"></div> */}
-      </section>
+
     </div>
   );
 } 
