@@ -8,8 +8,8 @@ const Team = () => {
   const teamMembers = [
     {
       id: 1,
-      name: "Kazim Hassani",
-      role: "Founder - Video Editor - Game Dev - 3D",
+      name: "Muhammad Kazim",
+      role: "Founder - CEO",
       // description: "Leading our creative vision with 8+ years in 3D animation and visual storytelling. Specializes in character design and cinematic animations.",
       image: "/team/kazim.jpg",
       technologies: ["Blender", "Premire Pro", "Unreal Engine"],
@@ -23,10 +23,10 @@ const Team = () => {
     {
       id: 1,
       name: "Muhammad Ibrahim",
-      role: "Video Editor - Designer",
+      role: "Video Editor - 3D Animator",
       // description: "Leading our creative vision with 8+ years in 3D animation and visual storytelling. Specializes in character design and cinematic animations.",
       image: "/team/ibrahim.jpg",
-      technologies: ["Premire Pro", "Capcut Pro", "Davincii"],
+      technologies: ["Premire Pro","Unreal Engine", "Davincii"],
       social: {
         linkedin: "#",
         github: "#",
@@ -109,7 +109,7 @@ const Team = () => {
         </motion.div>
 
         {/* Team Specializations */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -129,7 +129,7 @@ const Team = () => {
               <div className="text-gray-300 text-sm font-medium">{role}</div>
             </motion.div>
           ))}
-        </motion.div>
+        </motion.div> */}
 
         {/* Featured Team Members */}
         <motion.div
@@ -139,11 +139,11 @@ const Team = () => {
           viewport={{ once: true }}
           className="mb-16"
         >
-          <h3 className="text-2xl md:text-3xl font-bold text-white text-center mb-8">
+          {/* <h3 className="text-2xl md:text-3xl font-bold text-white text-center mb-8">
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-lime-300 to-lime-500">
               Leadership Team
             </span>
-          </h3>
+          </h3> */}
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {teamMembers.filter(member => member.featured).map((member, index) => (

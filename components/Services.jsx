@@ -36,7 +36,7 @@ const Services = () => {
     { name: "outfitters", logo: "/logos/outfitters.png" },
     { name: "ONE", logo: "/logos/one.png" },
     { name: "devsinc", logo: "/logos/devsinc.png" },
-    // { name: "envatio", logo: "E" },
+    { name: "Niftic", logo: "/logos/niftic.png" },
     // { name: "envatio", logo: "E" }
   ];
 

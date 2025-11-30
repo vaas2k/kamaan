@@ -142,7 +142,7 @@ const VideosPage = () => {
         <div className="w-full h-96 bg-gray-800 rounded-2xl flex items-center justify-center">
           <img
            src={video.thumbnail}
-           className="w-full h-full"
+           className="w-full h-full object-contain"
            />
         </div>
       );
