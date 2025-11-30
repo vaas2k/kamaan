@@ -39,7 +39,7 @@ const Team = () => {
       name: "Malik Ismail",
       role: "Web Developer",
       // description: "Leading our creative vision with 8+ years in 3D animation and visual storytelling. Specializes in character design and cinematic animations.",
-      image: "/team/ibrahim.jpg",
+      image: "/team/ismail.jpg",
       technologies: ["ReactJS", "NextJS", "Typescript"],
       social: {
         linkedin: "#",
