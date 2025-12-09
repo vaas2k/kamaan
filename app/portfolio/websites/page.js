@@ -4,10 +4,56 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ExternalLink, Github, ArrowRight, Sparkles, Filter,
   Eye, Heart, Share2, Zap, Star, Users, Clock,
-  Smartphone, Monitor, Globe, Code, X
+  Smartphone, Monitor, Globe, Code, X, Image as ImageIcon
 } from "lucide-react";
 import axios from "axios";
 import Link from "next/link";
+
+// Helper function to format Google Drive thumbnail URLs
+const formatThumbnailUrl = (url) => {
+  if (!url) return null;
+  
+  // Handle Google Drive URLs
+  if (url.includes('drive.google.com')) {
+    // Extract file ID from various Google Drive URL formats
+    let fileId = '';
+    
+    // Format 1: https://drive.google.com/file/d/FILE_ID/view
+    const driveMatch = url.match(/\/d\/([^\/]+)/);
+    if (driveMatch && driveMatch[1]) {
+      fileId = driveMatch[1];
+    }
+    // Format 2: https://drive.google.com/open?id=FILE_ID
+    else if (url.includes('id=')) {
+      const idMatch = url.match(/id=([^&]+)/);
+      if (idMatch && idMatch[1]) {
+        fileId = idMatch[1];
+      }
+    }
+    // Format 3: Direct file ID in URL
+    else if (url.length === 33 && !url.includes('/')) {
+      fileId = url; // Might be just the file ID
+    }
+    
+    if (fileId) {
+      return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+    }
+  }
+  
+  return url;
+};
+
+// Helper function to preserve line breaks in text
+const formatDescription = (text) => {
+  if (!text) return '';
+  // Replace newlines with <br> tags for HTML display
+  return text.split('\n').map((line, index) => (
+    <React.Fragment key={index}>
+      {line}
+      {index < text.split('\n').length - 1 && <br />}
+    </React.Fragment>
+  ));
+};
 
 const WebsitesPage = () => {
   const [activeFilter, setActiveFilter] = useState("all");
@@ -15,6 +61,7 @@ const WebsitesPage = () => {
   const [hoveredWebsite, setHoveredWebsite] = useState(null);
   const [websiteProjects, setWebsiteProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [thumbnailErrors, setThumbnailErrors] = useState({});
 
   const filters = [
     { id: "all", label: "All Projects" },
@@ -33,7 +80,8 @@ const WebsitesPage = () => {
     "website": Monitor,
     "web-app": Globe,
     "dashboard": Code,
-    "mobile-app": Smartphone
+    "mobile-app": Smartphone,
+    "default": Globe
   };
 
   const stats = [
@@ -43,11 +91,67 @@ const WebsitesPage = () => {
     { number: "50+", label: "Technologies", icon: Zap }
   ];
 
+  // Safe data access functions
+  const getFeatures = (website) => {
+    if (!website?.features) return [];
+    return Array.isArray(website.features) ? website.features : [website.features];
+  };
+
+  const getTags = (website) => {
+    if (!website?.tags) return [];
+    return Array.isArray(website.tags) ? website.tags : [website.tags];
+  };
+
+  const getCategories = (website) => {
+    if (!website?.categories) return [];
+    return Array.isArray(website.categories) ? website.categories : [website.categories];
+  };
+
+  const getTypeIcon = (website) => {
+    const IconComponent = typeIcons[website?.type?.toLowerCase()] || typeIcons.default;
+    return <IconComponent className="w-3 h-3" />;
+  };
+
+  // Format website data with proper thumbnail URLs
+  const formatWebsiteData = (data) => {
+    return data.map(website => ({
+      ...website,
+      formattedThumbnail: formatThumbnailUrl(website.thumbnail)
+    }));
+  };
+
+  // Handle thumbnail image error
+  const handleThumbnailError = (websiteId) => {
+    setThumbnailErrors(prev => ({
+      ...prev,
+      [websiteId]: true
+    }));
+  };
+
+  // Calculate dynamic stats from website data
+  const calculateStats = () => {
+    if (websiteProjects.length === 0) return stats;
+    
+    const totalWebsites = websiteProjects.length;
+    const totalViews = websiteProjects.reduce((sum, website) => sum + (website.views || 0), 0);
+    const uniqueTechnologies = [...new Set(websiteProjects.flatMap(w => getTags(w)))].length;
+    const uniqueClients = [...new Set(websiteProjects.map(w => w.client))].length;
+    
+    return [
+      { number: `${totalWebsites}+`, label: "Web Projects", icon: Globe },
+      { number: `${(totalViews / 1000000).toFixed(1)}M+`, label: "Total Views", icon: Eye },
+      { number: `${uniqueClients}+`, label: "Happy Clients", icon: Star },
+      { number: `${uniqueTechnologies}+`, label: "Technologies", icon: Zap }
+    ];
+  };
+
   const filteredWebsites = activeFilter === "all"
     ? websiteProjects
     : websiteProjects.filter(website =>
       website.categories && website.categories.includes(activeFilter)
     );
+
+  const dynamicStats = calculateStats();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -70,26 +174,6 @@ const WebsitesPage = () => {
       }
     }
   };
-  // Safe data access functions
-  const getFeatures = (website) => {
-    if (!website.features) return [];
-    return Array.isArray(website.features) ? website.features : [website.features];
-  };
-
-  const getTags = (website) => {
-    if (!website.tags) return [];
-    return Array.isArray(website.tags) ? website.tags : [website.tags];
-  };
-
-  const getCategories = (website) => {
-    if (!website.categories) return [];
-    return Array.isArray(website.categories) ? website.categories : [website.categories];
-  };
-
-  const getTypeIcon = (website) => {
-    const IconComponent = typeIcons[website.type] || Globe;
-    return <IconComponent className="w-3 h-3" />;
-  };
 
   useEffect(() => {
     async function fetchWebsites() {
@@ -97,11 +181,13 @@ const WebsitesPage = () => {
         setLoading(true);
         const response = await axios.get('/api/admin/web');
         if (response.status === 200) {
-          console.log("Fetched Website Projects:", response.data);
-          setWebsiteProjects(response.data);
+          const formattedData = formatWebsiteData(response.data);
+          console.log("Formatted Website Projects:", formattedData);
+          setWebsiteProjects(formattedData);
         }
       } catch (error) {
         console.error("Error fetching website projects:", error);
+        alert('Failed to load website projects. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -112,7 +198,10 @@ const WebsitesPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-lime-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-lime-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-lime-400 text-lg">Loading website portfolio...</p>
+        </div>
       </div>
     );
   }
@@ -212,7 +301,7 @@ const WebsitesPage = () => {
               variants={itemVariants}
               className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto"
             >
-              {stats.map((stat, index) => (
+              {dynamicStats.map((stat, index) => (
                 <motion.div
                   key={stat.label}
                   className="text-center group"
@@ -246,39 +335,47 @@ const WebsitesPage = () => {
       </section>
 
       {/* Websites Portfolio Section */}
-      <section className="relative py-32 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Filter Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="flex flex-wrap justify-center gap-4 mb-16"
-          >
-            {filters.map((filter) => (
-              <motion.button
-                key={filter.id}
-                onClick={() => setActiveFilter(filter.id)}
-                className={`px-6 py-3 rounded-full border backdrop-blur-sm transition-all duration-500 flex items-center gap-2 ${activeFilter === filter.id
-                    ? "bg-lime-500/20 border-lime-500 text-lime-400 shadow-2xl shadow-lime-500/25"
-                    : "bg-gray-900/50 border-gray-600 text-gray-400 hover:border-lime-500/50 hover:text-lime-300"
-                  }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Filter className="w-4 h-4" />
-                {filter.label}
-              </motion.button>
-            ))}
-          </motion.div>
-
-          {/* Websites Grid */}
-          {websiteProjects.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="text-gray-400 text-lg">No website projects found</div>
+      {websiteProjects.length === 0 ? (
+        <section className="relative py-32 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="w-32 h-32 bg-lime-500/10 rounded-full flex items-center justify-center mx-auto mb-8">
+              <Globe className="w-16 h-16 text-lime-400" />
             </div>
-          ) : (
+            <h2 className="text-3xl font-bold text-white mb-4">No Website Projects Available</h2>
+            <p className="text-gray-400 text-lg mb-8">
+              Our web development portfolio is being updated. Please check back soon!
+            </p>
+          </div>
+        </section>
+      ) : (
+        <section className="relative py-32 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            {/* Filter Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="flex flex-wrap justify-center gap-4 mb-16"
+            >
+              {filters.map((filter) => (
+                <motion.button
+                  key={filter.id}
+                  onClick={() => setActiveFilter(filter.id)}
+                  className={`px-6 py-3 rounded-full border backdrop-blur-sm transition-all duration-500 flex items-center gap-2 ${activeFilter === filter.id
+                      ? "bg-lime-500/20 border-lime-500 text-lime-400 shadow-2xl shadow-lime-500/25"
+                      : "bg-gray-900/50 border-gray-600 text-gray-400 hover:border-lime-500/50 hover:text-lime-300"
+                    }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Filter className="w-4 h-4" />
+                  {filter.label}
+                </motion.button>
+              ))}
+            </motion.div>
+
+            {/* Websites Grid */}
             <motion.div
               layout
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
@@ -299,12 +396,20 @@ const WebsitesPage = () => {
                   >
                     <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-700 rounded-3xl overflow-hidden hover:border-lime-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-lime-500/10 h-full flex flex-col">
                       {/* Website Thumbnail */}
-                      <div className="relative overflow-hidden flex-1">
-                        <img
-                          src={website.thumbnail}
-                          alt={website.title}
-                          className="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-500"
-                        />
+                      <div className="relative overflow-hidden flex-1 h-64">
+                        {thumbnailErrors[website._id] || !website.formattedThumbnail ? (
+                          <div className="w-full h-full bg-gray-800 flex flex-col items-center justify-center">
+                            <ImageIcon className="w-12 h-12 text-gray-600 mb-2" />
+                            <p className="text-gray-500 text-sm">No preview available</p>
+                          </div>
+                        ) : (
+                          <img
+                            src={website.formattedThumbnail}
+                            alt={website.title}
+                            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                            onError={() => handleThumbnailError(website._id)}
+                          />
+                        )}
 
                         {/* Overlay */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -354,17 +459,42 @@ const WebsitesPage = () => {
                             {website.duration || 'N/A'}
                           </div>
                         </div>
+
+                        {/* Categories Badges */}
+                        <div className="absolute top-12 left-4 flex flex-wrap gap-1 max-w-[60%]">
+                          {getCategories(website).slice(0, 2).map((category, catIndex) => (
+                            <span 
+                              key={catIndex}
+                              className="bg-blue-500/90 backdrop-blur-sm rounded-full px-2 py-1 text-white text-xs font-medium truncate"
+                              title={category}
+                            >
+                              {category}
+                            </span>
+                          ))}
+                          {getCategories(website).length > 2 && (
+                            <span className="bg-blue-700/90 backdrop-blur-sm rounded-full px-2 py-1 text-white text-xs font-medium">
+                              +{getCategories(website).length - 2}
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       {/* Website Info */}
                       <div className="p-6">
-                        <h3 className="text-xl font-bold text-white mb-3 group-hover:text-lime-300 transition-colors duration-300 line-clamp-2">
+                        <h3 className="text-xl font-bold text-white mb-3 group-hover:text-lime-300 transition-colors duration-300 line-clamp-2 min-h-[56px]">
                           {website.title}
                         </h3>
 
-                        <p className="text-gray-400 text-sm mb-4 line-clamp-2">
-                          {website.description}
-                        </p>
+                        {/* Description with Line Breaks */}
+                        <div className="text-gray-400 text-sm mb-4 line-clamp-3 min-h-[60px] whitespace-pre-line">
+                          {formatDescription(website.description)}
+                        </div>
+
+                        {/* Client */}
+                        <div className="flex items-center gap-2 text-gray-400 text-sm mb-3">
+                          <Users className="w-4 h-4" />
+                          <span className="truncate" title={website.client}>{website.client}</span>
+                        </div>
 
                         {/* Features */}
                         {getFeatures(website).length > 0 && (
@@ -374,7 +504,8 @@ const WebsitesPage = () => {
                               {getFeatures(website).slice(0, 3).map((feature, featureIndex) => (
                                 <span
                                   key={featureIndex}
-                                  className="px-2 py-1 bg-lime-500/10 text-lime-400 text-xs rounded-md border border-lime-500/20"
+                                  className="px-2 py-1 bg-lime-500/10 text-lime-400 text-xs rounded-md border border-lime-500/20 truncate max-w-[100px]"
+                                  title={feature}
                                 >
                                   {feature}
                                 </span>
@@ -390,85 +521,95 @@ const WebsitesPage = () => {
 
                         {/* Tags */}
                         {getTags(website).length > 0 && (
-                          <div className="flex flex-wrap gap-1 mb-4">
-                            {getTags(website).map((tag, tagIndex) => (
-                              <span
-                                key={tagIndex}
-                                className="px-2 py-1 bg-gray-700/50 text-gray-300 text-xs rounded-md border border-gray-600"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                        {/* Categories Display */}
-                        {getCategories(website).length > 0 && (
-                          <div className="mb-3">
-                            <p className="text-xs text-gray-400 mb-1">Categories:</p>
+                          <div className="mb-4">
+                            <h4 className="text-sm font-semibold text-blue-400 mb-2">Technologies:</h4>
                             <div className="flex flex-wrap gap-1">
-                              {getCategories(website).map((category, catIndex) => (
+                              {getTags(website).slice(0, 4).map((tag, tagIndex) => (
                                 <span
-                                  key={catIndex}
-                                  className="px-2 py-1 bg-lime-500/10 text-lime-400 text-xs rounded-md border border-lime-500/20"
+                                  key={tagIndex}
+                                  className="px-2 py-1 bg-blue-500/10 text-blue-400 text-xs rounded-md border border-blue-500/20 truncate max-w-[80px]"
+                                  title={tag}
                                 >
-                                  {category}
+                                  {tag}
                                 </span>
                               ))}
+                              {getTags(website).length > 4 && (
+                                <span className="px-2 py-1 bg-gray-600 text-gray-300 text-xs rounded-md">
+                                  +{getTags(website).length - 4} more
+                                </span>
+                              )}
                             </div>
                           </div>
                         )}
 
-                        {/* Stats */}
-                        <div className="flex items-center justify-between text-gray-400 text-sm">
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-1">
-                              <Eye className="w-4 h-4" />
-                              {website.views || '0'}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Heart className="w-4 h-4" />
-                              {website.likes || '0'}
+                        {/* Categories Display */}
+                        {getCategories(website).length > 0 && (
+                          <div className="mb-4">
+                            <p className="text-xs text-gray-400 mb-1">Categories:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {getCategories(website).slice(0, 3).map((category, catIndex) => (
+                                <span
+                                  key={catIndex}
+                                  className="px-2 py-1 bg-lime-500/10 text-lime-400 text-xs rounded-md border border-lime-500/20 truncate max-w-[100px]"
+                                  title={category}
+                                >
+                                  {category}
+                                </span>
+                              ))}
+                              {getCategories(website).length > 3 && (
+                                <span className="px-2 py-1 bg-gray-600 text-gray-300 text-xs rounded-md">
+                                  +{getCategories(website).length - 3} more
+                                </span>
+                              )}
                             </div>
                           </div>
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="text-lime-400 hover:text-lime-300 transition-colors"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // Share functionality
-                            }}
-                          >
-                            <Share2 className="w-4 h-4" />
-                          </motion.button>
-                        </div>
+                        )}
                       </div>
                     </div>
                   </motion.div>
                 ))}
               </AnimatePresence>
             </motion.div>
-          )}
 
-          {/* Load More Button */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mt-16"
-          >
-            {/* <motion.button
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 bg-lime-500 hover:bg-lime-600 text-white font-bold rounded-2xl transition-all duration-300 shadow-2xl hover:shadow-3xl hover:shadow-lime-500/25 flex items-center gap-3 mx-auto"
-            >
-              <span>Load More Projects</span>
-              <ArrowRight className="w-5 h-5" />
-            </motion.button> */}
-          </motion.div>
-        </div>
-      </section>
+            {/* No Results Message */}
+            {filteredWebsites.length === 0 && websiteProjects.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-16"
+              >
+                <div className="w-24 h-24 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Filter className="w-12 h-12 text-gray-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2">No websites found</h3>
+                <p className="text-gray-400">
+                  No websites match the selected category. Try choosing a different filter.
+                </p>
+                <button
+                  onClick={() => setActiveFilter("all")}
+                  className="mt-4 px-6 py-2 bg-lime-500 hover:bg-lime-600 text-white rounded-lg transition-colors"
+                >
+                  Show All Websites
+                </button>
+              </motion.div>
+            )}
+
+            {/* Results Count */}
+            {filteredWebsites.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                className="text-center mt-12 text-gray-400"
+              >
+                Showing {filteredWebsites.length} of {websiteProjects.length} websites
+                {activeFilter !== "all" && (
+                  <span> in "{filters.find(f => f.id === activeFilter)?.label}"</span>
+                )}
+              </motion.div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* CTA Section */}
       <section className="relative py-32 px-4 sm:px-6 lg:px-8">
@@ -536,7 +677,16 @@ const WebsitesPage = () => {
                     <ArrowRight className="w-5 h-5" />
                   </motion.button>
                 </Link>
-
+                
+                <Link href={'/portfolio'}>
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-12 py-4 bg-transparent border-2 border-lime-500 text-lime-400 hover:bg-lime-500/10 font-bold rounded-2xl transition-all duration-300 flex items-center gap-3 text-lg"
+                  >
+                    View Full Portfolio
+                  </motion.button>
+                </Link>
               </motion.div>
             </div>
           </motion.div>
@@ -563,11 +713,22 @@ const WebsitesPage = () => {
               <div className="relative">
                 {/* Website Preview */}
                 <div className="w-full h-64 bg-gray-800 rounded-2xl flex items-center justify-center mb-6 overflow-hidden">
-                  <img
-                    src={selectedWebsite.thumbnail}
-                    alt={selectedWebsite.title}
-                    className="w-full h-full object-cover"
-                  />
+                  {selectedWebsite.formattedThumbnail ? (
+                    <img
+                      src={selectedWebsite.formattedThumbnail}
+                      alt={selectedWebsite.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.src = '/default-thumbnail.jpg';
+                        e.target.className = "w-full h-full object-contain bg-gray-800 p-4";
+                      }}
+                    />
+                  ) : (
+                    <div className="text-center">
+                      <Globe className="w-16 h-16 text-gray-600 mb-4" />
+                      <p className="text-gray-400">Website Preview</p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Close Button */}
@@ -608,10 +769,24 @@ const WebsitesPage = () => {
               <div className="space-y-6">
                 <div>
                   <h3 className="text-3xl font-bold text-white mb-2">{selectedWebsite.title}</h3>
-                  <p className="text-gray-400 mb-4">{selectedWebsite.description}</p>
-                  <div className="flex items-center justify-between">
+                  
+                  {/* Description with Line Breaks in Modal */}
+                  <div className="text-gray-400 mb-4 whitespace-pre-line">
+                    {formatDescription(selectedWebsite.description)}
+                  </div>
+                  
+                  <div className="flex items-center justify-between mb-4">
                     <div className="text-lime-400 font-semibold">{selectedWebsite.client}</div>
-                    <div className="text-gray-400 text-sm">{selectedWebsite.duration}</div>
+                    <div className="flex items-center gap-4 text-gray-400 text-sm">
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        {selectedWebsite.duration}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {getTypeIcon(selectedWebsite)}
+                        {selectedWebsite.type?.replace('-', ' ') || 'Website'}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -622,7 +797,7 @@ const WebsitesPage = () => {
                       {getFeatures(selectedWebsite).map((feature, index) => (
                         <div key={index} className="flex items-center gap-2 text-gray-300">
                           <div className="w-2 h-2 bg-lime-400 rounded-full"></div>
-                          {feature}
+                          <span className="text-sm">{feature}</span>
                         </div>
                       ))}
                     </div>
@@ -630,13 +805,13 @@ const WebsitesPage = () => {
                 )}
 
                 {getTags(selectedWebsite).length > 0 && (
-                  <div>
+                  <div className="pt-4 border-t border-gray-700">
                     <h4 className="text-xl font-bold text-white mb-3">Technologies Used</h4>
                     <div className="flex flex-wrap gap-2">
                       {getTags(selectedWebsite).map((tag, index) => (
                         <span
                           key={index}
-                          className="px-3 py-1 bg-lime-500/10 text-lime-400 text-sm rounded-lg border border-lime-500/20"
+                          className="px-3 py-1 bg-blue-500/10 text-blue-400 text-sm rounded-lg border border-blue-500/20"
                         >
                           {tag}
                         </span>
@@ -644,6 +819,32 @@ const WebsitesPage = () => {
                     </div>
                   </div>
                 )}
+
+                {getCategories(selectedWebsite).length > 0 && (
+                  <div className="pt-4 border-t border-gray-700">
+                    <h4 className="text-xl font-bold text-white mb-3">Categories</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {getCategories(selectedWebsite).map((category, index) => (
+                        <span
+                          key={index}
+                          className="px-3 py-1 bg-lime-500/10 text-lime-400 text-sm rounded-lg border border-lime-500/20"
+                        >
+                          {category}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 mt-6 pt-6 border-t border-gray-700">
+                  <button
+                    onClick={() => setSelectedWebsite(null)}
+                    className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg transition-colors font-medium"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
             </motion.div>
           </motion.div>

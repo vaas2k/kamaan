@@ -4,11 +4,67 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Play, Pause, Volume2, VolumeX, Maximize, ArrowRight,
   Sparkles, Filter, Clock, Eye, Heart, Share2,
-  Zap, Star, Users, Award, X
+  Zap, Star, Users, Award, X, Image as ImageIcon
 } from "lucide-react";
 import axios from "axios";
-import Loading from "@/components/Loading";
 import Link from "next/link";
+
+// Helper function to format Google Drive thumbnail URLs
+const formatThumbnailUrl = (url) => {
+  if (!url) return null;
+  
+  // Handle Google Drive URLs
+  if (url.includes('drive.google.com')) {
+    // Extract file ID from various Google Drive URL formats
+    let fileId = '';
+    
+    // Format 1: https://drive.google.com/file/d/FILE_ID/view
+    const driveMatch = url.match(/\/d\/([^\/]+)/);
+    if (driveMatch && driveMatch[1]) {
+      fileId = driveMatch[1];
+    }
+    // Format 2: https://drive.google.com/open?id=FILE_ID
+    else if (url.includes('id=')) {
+      const idMatch = url.match(/id=([^&]+)/);
+      if (idMatch && idMatch[1]) {
+        fileId = idMatch[1];
+      }
+    }
+    // Format 3: Direct file ID in URL
+    else if (url.length === 33 && !url.includes('/')) {
+      fileId = url; // Might be just the file ID
+    }
+    
+    if (fileId) {
+      return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+    }
+  }
+  
+  return url;
+};
+
+// Helper function to preserve line breaks in text
+const formatDescription = (text) => {
+  if (!text) return '';
+  // Replace newlines with <br> tags for HTML display
+  return text.split('\n').map((line, index) => (
+    <React.Fragment key={index}>
+      {line}
+      {index < text.split('\n').length - 1 && <br />}
+    </React.Fragment>
+  ));
+};
+
+// Helper function to validate image URL
+const isValidImage = (url) => {
+  if (!url) return false;
+  try {
+    const parsedUrl = new URL(url);
+    return /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(parsedUrl.pathname);
+  } catch {
+    return false;
+  }
+};
 
 const VideosPage = () => {
   const [activeFilter, setActiveFilter] = useState("all");
@@ -18,6 +74,8 @@ const VideosPage = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [filterScrollPosition, setFilterScrollPosition] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [thumbnailErrors, setThumbnailErrors] = useState({});
   const filterContainerRef = useRef(null);
 
   const filters = [
@@ -138,12 +196,28 @@ const VideosPage = () => {
     const source = getVideoSource(video.videoUrl);
 
     if (!source) {
+      const formattedThumbnail = formatThumbnailUrl(video.thumbnail);
       return (
         <div className="w-full h-96 bg-gray-800 rounded-2xl flex items-center justify-center">
-          <img
-           src={video.thumbnail}
-           className="w-full h-full object-contain"
-           />
+          {formattedThumbnail ? (
+            <img
+              src={formattedThumbnail}
+              alt={video.title}
+              className="w-full h-full object-contain bg-black"
+              onError={(e) => {
+                e.target.src = '/default-thumbnail.jpg';
+                e.target.className = "w-full h-full object-contain bg-gray-800 p-4";
+              }}
+            />
+          ) : (
+            <div className="text-center">
+              <div className="w-20 h-20 bg-lime-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Play className="w-10 h-10 text-white ml-1" />
+              </div>
+              <p className="text-white text-lg">Video Preview</p>
+              <p className="text-gray-400 text-sm mt-2">{video.title}</p>
+            </div>
+          )}
         </div>
       );
     }
@@ -241,14 +315,34 @@ const VideosPage = () => {
     }
   };
 
+  // Handle thumbnail image error
+  const handleThumbnailError = (videoId) => {
+    setThumbnailErrors(prev => ({
+      ...prev,
+      [videoId]: true
+    }));
+  };
+
+  // Format video data with proper thumbnail URLs
+  const formatVideoData = (data) => {
+    return data.map(video => ({
+      ...video,
+      formattedThumbnail: formatThumbnailUrl(video.thumbnail)
+    }));
+  };
+
   useEffect(() => {
     async function fetchData() {
       try {
+        setLoading(true);
         const response = await axios.get('/api/admin/video');
-        const data = response.data;
-        setVideoProjects(data);
+        const formattedData = formatVideoData(response.data);
+        setVideoProjects(formattedData);
       } catch (error) {
         console.error('Error fetching data:', error);
+        alert('Failed to load videos. Please try again.');
+      } finally {
+        setLoading(false);
       }
     }
     fetchData();
@@ -290,6 +384,36 @@ const VideosPage = () => {
     container.addEventListener('scroll', handleScroll);
     return () => container.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Calculate dynamic stats from video data
+  const calculateStats = () => {
+    if (videoProjects.length === 0) return stats;
+    
+    const totalVideos = videoProjects.length;
+    const totalViews = videoProjects.reduce((sum, video) => sum + (video.views || 0), 0);
+    const uniqueClients = [...new Set(videoProjects.map(v => v.client))].length;
+    const uniqueCategories = [...new Set(videoProjects.flatMap(v => v.categories || []))].length;
+    
+    return [
+      { number: `${totalVideos}+`, label: "Video Projects", icon: Play },
+      { number: `${(totalViews / 1000000).toFixed(1)}M+`, label: "Total Views", icon: Eye },
+      { number: "98%", label: "Client Satisfaction", icon: Star },
+      { number: `${uniqueClients}+`, label: "Happy Clients", icon: Users }
+    ];
+  };
+
+  const dynamicStats = calculateStats();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-lime-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-lime-400 text-lg">Loading video portfolio...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-hidden">
@@ -386,7 +510,7 @@ const VideosPage = () => {
               variants={itemVariants}
               className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto"
             >
-              {stats.map((stat, index) => (
+              {dynamicStats.map((stat, index) => (
                 <motion.div
                   key={stat.label}
                   className="text-center group"
@@ -421,9 +545,17 @@ const VideosPage = () => {
 
       {/* Video Portfolio Section */}
       {videoProjects.length === 0 ? (
-        <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-2 border-lime-500 border-t-transparent rounded-full animate-spin"></div>
-        </div>
+        <section className="relative py-32 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="w-32 h-32 bg-lime-500/10 rounded-full flex items-center justify-center mx-auto mb-8">
+              <Play className="w-16 h-16 text-lime-400" />
+            </div>
+            <h2 className="text-3xl font-bold text-white mb-4">No Videos Available</h2>
+            <p className="text-gray-400 text-lg mb-8">
+              Our video portfolio is being updated. Please check back soon!
+            </p>
+          </div>
+        </section>
       ) : (
         <section className="relative py-32 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
@@ -506,6 +638,7 @@ const VideosPage = () => {
                 </div>
               </div>
             </motion.div>
+
             {/* Video Grid */}
             <motion.div
               layout
@@ -525,12 +658,20 @@ const VideosPage = () => {
                   >
                     <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-700 rounded-3xl overflow-hidden hover:border-lime-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-lime-500/10">
                       {/* Video Thumbnail */}
-                      <div className="relative overflow-hidden">
-                        <img
-                          src={video.thumbnail}
-                          alt={video.title}
-                          className="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-500"
-                        />
+                      <div className="relative overflow-hidden h-64">
+                        {thumbnailErrors[video._id] || !video.formattedThumbnail ? (
+                          <div className="w-full h-full bg-gray-800 flex flex-col items-center justify-center">
+                            <ImageIcon className="w-12 h-12 text-gray-600 mb-2" />
+                            <p className="text-gray-500 text-sm">No thumbnail</p>
+                          </div>
+                        ) : (
+                          <img
+                            src={video.formattedThumbnail}
+                            alt={video.title}
+                            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                            onError={() => handleThumbnailError(video._id)}
+                          />
+                        )}
 
                         {/* Overlay */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -554,11 +695,12 @@ const VideosPage = () => {
                         </div>
 
                         {/* Categories Badges */}
-                        <div className="absolute top-4 left-4 flex flex-col gap-1">
+                        <div className="absolute top-4 left-4 flex flex-col gap-1 max-w-[60%]">
                           {video.categories && video.categories.slice(0, 2).map((category, catIndex) => (
                             <span 
                               key={catIndex}
-                              className="bg-lime-500/90 backdrop-blur-sm rounded-full px-2 py-1 text-white text-xs font-medium"
+                              className="bg-lime-500/90 backdrop-blur-sm rounded-full px-2 py-1 text-white text-xs font-medium truncate"
+                              title={category}
                             >
                               {category}
                             </span>
@@ -571,58 +713,106 @@ const VideosPage = () => {
                         </div>
 
                         {/* Client Badge */}
-                        <div className="absolute bottom-4 left-4 bg-purple-500/90 backdrop-blur-sm rounded-full px-3 py-1">
-                          <div className="text-white text-sm font-medium">
-                            {video.client}
+                        {video.client && (
+                          <div className="absolute bottom-4 left-4 bg-purple-500/90 backdrop-blur-sm rounded-full px-3 py-1 max-w-[70%]">
+                            <div className="text-white text-sm font-medium truncate" title={video.client}>
+                              {video.client}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Stats Badge */}
+                        <div className="absolute bottom-4 right-4 bg-blue-500/90 backdrop-blur-sm rounded-full px-3 py-1">
+                          <div className="flex items-center gap-1 text-white text-xs">
+                            <Eye className="w-3 h-3" />
+                            {video.views ? (video.views > 1000 ? `${(video.views/1000).toFixed(1)}K` : video.views) : '0'}
                           </div>
                         </div>
                       </div>
 
                       {/* Video Info */}
                       <div className="p-6">
-                        <h3 className="text-xl font-bold text-white mb-3 group-hover:text-lime-300 transition-colors duration-300 line-clamp-2">
+                        <h3 className="text-xl font-bold text-white mb-3 group-hover:text-lime-300 transition-colors duration-300 line-clamp-2 min-h-[56px]">
                           {video.title}
                         </h3>
 
-                        <p className="text-gray-400 text-sm mb-4 line-clamp-2">
-                          {video.description}
-                        </p>
+                        {/* Description with Line Breaks */}
+                        <div className="text-gray-400 text-sm mb-4 line-clamp-3 min-h-[60px] whitespace-pre-line">
+                          {formatDescription(video.description)}
+                        </div>
 
                         {/* Categories Display */}
                         {video.categories && video.categories.length > 0 && (
                           <div className="mb-3">
                             <p className="text-xs text-gray-400 mb-1">Categories:</p>
                             <div className="flex flex-wrap gap-1">
-                              {video.categories.map((category, catIndex) => (
+                              {video.categories.slice(0, 3).map((category, catIndex) => (
                                 <span
                                   key={catIndex}
-                                  className="px-2 py-1 bg-lime-500/10 text-lime-400 text-xs rounded-md border border-lime-500/20"
+                                  className="px-2 py-1 bg-lime-500/10 text-lime-400 text-xs rounded-md border border-lime-500/20 truncate max-w-[100px]"
+                                  title={category}
                                 >
                                   {category}
                                 </span>
                               ))}
+                              {video.categories.length > 3 && (
+                                <span className="px-2 py-1 bg-gray-600 text-gray-300 text-xs rounded-md">
+                                  +{video.categories.length - 3} more
+                                </span>
+                              )}
                             </div>
                           </div>
                         )}
 
                         {/* Tags */}
                         {video.tags && video.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            {video.tags.slice(0, 3).map((tag, tagIndex) => (
-                              <span
-                                key={tagIndex}
-                                className="px-2 py-1 bg-blue-500/10 text-blue-400 text-xs rounded-md border border-blue-500/20"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                            {video.tags.length > 3 && (
-                              <span className="px-2 py-1 bg-gray-600 text-gray-300 text-xs rounded-md">
-                                +{video.tags.length - 3} more
-                              </span>
-                            )}
+                          <div className="mb-4">
+                            <p className="text-xs text-gray-400 mb-1">Tags:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {video.tags.slice(0, 3).map((tag, tagIndex) => (
+                                <span
+                                  key={tagIndex}
+                                  className="px-2 py-1 bg-blue-500/10 text-blue-400 text-xs rounded-md border border-blue-500/20 truncate max-w-[80px]"
+                                  title={tag}
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                              {video.tags.length > 3 && (
+                                <span className="px-2 py-1 bg-gray-600 text-gray-300 text-xs rounded-md">
+                                  +{video.tags.length - 3} more
+                                </span>
+                              )}
+                            </div>
                           </div>
                         )}
+
+                        {/* Video Stats */}
+                        <div className="flex items-center justify-between text-sm text-gray-400 pt-4 border-t border-gray-700">
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-1">
+                              <Eye className="w-4 h-4" />
+                              <span>{video.views?.toLocaleString() || 0}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Heart className="w-4 h-4" />
+                              <span>{video.likes?.toLocaleString() || 0}</span>
+                            </div>
+                          </div>
+                          {video.videoUrl && (
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(video.videoUrl, '_blank');
+                              }}
+                              className="px-3 py-1 bg-lime-500/10 text-lime-400 text-xs rounded-lg hover:bg-lime-500/20 transition-colors"
+                            >
+                              Watch
+                            </motion.button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </motion.div>
@@ -630,23 +820,42 @@ const VideosPage = () => {
               </AnimatePresence>
             </motion.div>
 
-            {/* Load More Button */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              className="text-center mt-16"
-            >
-              {/* <motion.button
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-8 py-4 bg-lime-500 hover:bg-lime-600 text-white font-bold rounded-2xl transition-all duration-300 shadow-2xl hover:shadow-3xl hover:shadow-lime-500/25 flex items-center gap-3 mx-auto"
+            {/* No Results Message */}
+            {filteredVideos.length === 0 && videoProjects.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-16"
               >
-                <span>Load More Videos</span>
-                <ArrowRight className="w-5 h-5" />
-              </motion.button> */}
-            </motion.div>
+                <div className="w-24 h-24 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Filter className="w-12 h-12 text-gray-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2">No videos found</h3>
+                <p className="text-gray-400">
+                  No videos match the selected category. Try choosing a different filter.
+                </p>
+                <button
+                  onClick={() => setActiveFilter("all")}
+                  className="mt-4 px-6 py-2 bg-lime-500 hover:bg-lime-600 text-white rounded-lg transition-colors"
+                >
+                  Show All Videos
+                </button>
+              </motion.div>
+            )}
+
+            {/* Results Count */}
+            {filteredVideos.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                className="text-center mt-12 text-gray-400"
+              >
+                Showing {filteredVideos.length} of {videoProjects.length} videos
+                {activeFilter !== "all" && (
+                  <span> in "{filters.find(f => f.id === activeFilter)?.label}"</span>
+                )}
+              </motion.div>
+            )}
           </div>
         </section>
       )}
@@ -717,6 +926,16 @@ const VideosPage = () => {
                     <ArrowRight className="w-5 h-5" />
                   </motion.button>
                 </Link>
+                
+                <Link href={'/portfolio'}>
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-12 py-4 bg-transparent border-2 border-lime-500 text-lime-400 hover:bg-lime-500/10 font-bold rounded-2xl transition-all duration-300 flex items-center gap-3 text-lg"
+                  >
+                    View Full Portfolio
+                  </motion.button>
+                </Link>
               </motion.div>
             </div>
           </motion.div>
@@ -763,7 +982,11 @@ const VideosPage = () => {
 
               <div className="mt-6">
                 <h3 className="text-2xl font-bold text-white mb-2">{selectedVideo.title}</h3>
-                <p className="text-gray-400 mb-4">{selectedVideo.description}</p>
+                
+                {/* Description with Line Breaks in Modal */}
+                <div className="text-gray-400 mb-4 whitespace-pre-line">
+                  {formatDescription(selectedVideo.description)}
+                </div>
                 
                 {/* Categories in Modal */}
                 {selectedVideo.categories && selectedVideo.categories.length > 0 && (
@@ -782,24 +1005,60 @@ const VideosPage = () => {
                   </div>
                 )}
 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mb-4">
                   <div className="text-purple-400 font-semibold">{selectedVideo.client}</div>
-                  <div className="text-gray-400 text-sm">{selectedVideo.duration}</div>
+                  <div className="flex items-center gap-4 text-gray-400 text-sm">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      {selectedVideo.duration}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Eye className="w-4 h-4" />
+                      {selectedVideo.views?.toLocaleString() || 0} views
+                    </div>
+                  </div>
                 </div>
 
                 {/* Tags in Modal */}
                 {selectedVideo.tags && selectedVideo.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    {selectedVideo.tags.map((tag, tagIndex) => (
-                      <span
-                        key={tagIndex}
-                        className="px-3 py-1 bg-blue-500/10 text-blue-400 text-sm rounded-lg border border-blue-500/20"
-                      >
-                        {tag}
-                      </span>
-                    ))}
+                  <div className="mt-4 pt-4 border-t border-gray-700">
+                    <p className="text-blue-400 font-semibold mb-2">Tags:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedVideo.tags.map((tag, tagIndex) => (
+                        <span
+                          key={tagIndex}
+                          className="px-3 py-1 bg-blue-500/10 text-blue-400 text-sm rounded-lg border border-blue-500/20"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 mt-6 pt-6 border-t border-gray-700">
+                  {selectedVideo.videoUrl && (
+                    <a
+                      href={selectedVideo.videoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 bg-lime-500 hover:bg-lime-600 text-white py-3 rounded-lg transition-colors text-center font-medium"
+                    >
+                      Watch on Original Platform
+                    </a>
+                  )}
+                  <button
+                    onClick={() => {
+                      setSelectedVideo(null);
+                      setIsPlaying(false);
+                      setIsMuted(false);
+                    }}
+                    className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg transition-colors font-medium"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
             </motion.div>
           </motion.div>
