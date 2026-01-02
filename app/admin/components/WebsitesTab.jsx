@@ -208,9 +208,9 @@ const WebsitesTab = () => {
     if (!formData.description.trim()) newErrors.description = 'Description is required';
     if (!formData.client.trim()) newErrors.client = 'Client name is required';
     if (!formData.thumbnail.trim()) newErrors.thumbnail = 'Thumbnail URL is required';
-    if (formData.thumbnail.trim() && !isValidImage(formData.thumbnail)) {
-      newErrors.thumbnail = 'Please enter a valid image URL (jpg, png, gif, webp)';
-    }
+    // if (formData.thumbnail.trim() && !isValidImage(formData.thumbnail)) {
+    //   newErrors.thumbnail = 'Please enter a valid image URL (jpg, png, gif, webp)';
+    // }
     if (!formData.liveUrl.trim()) newErrors.liveUrl = 'Live URL is required';
     if (!formData.githubUrl.trim()) newErrors.githubUrl = 'GitHub URL is required';
     
