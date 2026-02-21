@@ -537,7 +537,7 @@ const WebsitesTab = () => {
                     className={`w-full p-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none ${
                       errors.githubUrl ? 'border-red-500' : 'border-lime-500/20 focus:border-lime-500'
                     }`}
-                    required
+                    
                   />
                   {errors.githubUrl && (
                     <p className="mt-1 text-sm text-red-400">{errors.githubUrl}</p>
