@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
 
 // Helper function to format Google Drive thumbnail URLs
 const formatThumbnailUrl = (url) => {
@@ -65,8 +66,66 @@ const isValidImage = (url) => {
   }
 };
 
+const filters = [
+  { id: "all", label: "All Projects" },
+  { id: "Character Animation", label: "Character Animation" },
+  { id: "Architectural Visualization", label: "Architectural" },
+  { id: "3D Floor Plans", label: "3D Floor Plans" },
+  { id: "Product Modeling", label: "Product Modeling" },
+  { id: "Character Modeling", label: "Character Modeling" },
+  { id: "Environment Design", label: "Environment" },
+  { id: "Motion Graphics", label: "Motion Graphics" },
+  { id: "VFX", label: "VFX" },
+  { id: "Game Assets", label: "Game Assets" },
+  { id: "Medical Visualization", label: "Medical" }
+];
+
+const typeIcons = {
+  "Visualization": Camera,
+  "Modeling": Cuboid,
+  "Animation": Play,
+  "Rendering": RotateCw,
+  "Game Asset": Box,
+  "Architectural": Award,
+  "Product": Box,
+  "Character": Users,
+  "Motion Graphics": Zap,
+  "default": Cuboid
+};
+
+const stats = [
+  { number: "60+", label: "3D Projects", icon: Cuboid },
+  { number: "2.5M+", label: "Total Views", icon: Eye },
+  { number: "97%", label: "Client Satisfaction", icon: Star },
+  { number: "15+", label: "Software Tools", icon: Zap }
+];
+
+// Helper to slugify a string for URL-friendly paths
+const slugify = (text) => {
+  if (!text) return "";
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')        // Replace spaces with -
+    .replace(/[^\w\-]+/g, '')     // Remove all non-word chars
+    .replace(/\-\-+/g, '-');     // Replace multiple - with single -
+};
+
+const getFilterIdFromSlug = (slug) => {
+  if (!slug || slug === "all") return "all";
+  const matchedFilter = filters.find(f => slugify(f.id) === slug);
+  return matchedFilter ? matchedFilter.id : "all";
+};
+
 const Models3DPage = () => {
-  const [activeFilter, setActiveFilter] = useState("all");
+  const params = useParams();
+  const router = useRouter();
+
+  // Extract category slug from parameters (using optional catch-all structure)
+  const categorySlug = params?.category?.[0] || "all";
+  const activeFilter = getFilterIdFromSlug(categorySlug);
+
   const [selectedModel, setSelectedModel] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [modelProjects, setModelProjects] = useState([]);
@@ -76,39 +135,15 @@ const Models3DPage = () => {
   const [thumbnailErrors, setThumbnailErrors] = useState({});
   const filterContainerRef = useRef(null);
 
-  const filters = [
-    { id: "all", label: "All Projects" },
-    { id: "Character Animation", label: "Character Animation" },
-    { id: "Architectural Visualization", label: "Architectural" },
-    { id: "3D Floor Plans", label: "3D Floor Plans" },
-    { id: "Product Modeling", label: "Product Modeling" },
-    { id: "Character Modeling", label: "Character Modeling" },
-    { id: "Environment Design", label: "Environment" },
-    { id: "Motion Graphics", label: "Motion Graphics" },
-    { id: "VFX", label: "VFX" },
-    { id: "Game Assets", label: "Game Assets" },
-    { id: "Medical Visualization", label: "Medical" }
-  ];
-
-  const typeIcons = {
-    "Visualization": Camera,
-    "Modeling": Cuboid,
-    "Animation": Play,
-    "Rendering": RotateCw,
-    "Game Asset": Box,
-    "Architectural": Award,
-    "Product": Box,
-    "Character": Users,
-    "Motion Graphics": Zap,
-    "default": Cuboid
+  // Navigate to slug on filter click
+  const handleFilterClick = (filterId) => {
+    const slug = slugify(filterId);
+    if (slug === "all") {
+      router.push("/portfolio/3d-models");
+    } else {
+      router.push(`/portfolio/3d-models/${slug}`);
+    }
   };
-
-  const stats = [
-    { number: "60+", label: "3D Projects", icon: Cuboid },
-    { number: "2.5M+", label: "Total Views", icon: Eye },
-    { number: "97%", label: "Client Satisfaction", icon: Star },
-    { number: "15+", label: "Software Tools", icon: Zap }
-  ];
 
   // Updated filtering logic to handle multiple categories
   const filteredModels = activeFilter === "all"
@@ -634,7 +669,7 @@ const Models3DPage = () => {
                 {filters.map((filter) => (
                   <motion.button
                     key={filter.id}
-                    onClick={() => setActiveFilter(filter.id)}
+                    onClick={() => handleFilterClick(filter.id)}
                     className={`px-6 py-3 rounded-full border backdrop-blur-sm transition-all duration-500 flex items-center gap-2 whitespace-nowrap flex-shrink-0 ${activeFilter === filter.id
                       ? "bg-lime-500/20 border-lime-500 text-lime-400 shadow-2xl shadow-lime-500/25"
                       : "bg-gray-900/50 border-gray-600 text-gray-400 hover:border-lime-500/50 hover:text-lime-300"
@@ -682,7 +717,7 @@ const Models3DPage = () => {
                     onClick={() => setSelectedModel(model)}
                   >
                     <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-700 rounded-3xl overflow-hidden hover:border-lime-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-lime-500/10">
-                      {/* Model Thumbnail - FIXED to use formattedThumbnail */}
+                      {/* Model Thumbnail */}
                       <div className="relative overflow-hidden h-64">
                         {thumbnailErrors[model._id] || !model.formattedThumbnail ? (
                           <div className="w-full h-full bg-gray-800 flex flex-col items-center justify-center">
@@ -783,7 +818,7 @@ const Models3DPage = () => {
                           {model.title}
                         </h3>
 
-                        {/* Description with Line Breaks - FIXED: Use whitespace-pre-line */}
+                        {/* Description with Line Breaks */}
                         <div className="text-gray-400 text-sm mb-4 line-clamp-3 min-h-[60px] whitespace-pre-line">
                           {model.description}
                         </div>
@@ -905,7 +940,7 @@ const Models3DPage = () => {
                   No 3D projects match the selected category. Try choosing a different filter.
                 </p>
                 <button
-                  onClick={() => setActiveFilter("all")}
+                  onClick={() => handleFilterClick("all")}
                   className="mt-4 px-6 py-2 bg-lime-500 hover:bg-lime-600 text-white rounded-lg transition-colors"
                 >
                   Show All Projects
@@ -1053,7 +1088,7 @@ const Models3DPage = () => {
               <div className="mt-6">
                 <h3 className="text-2xl font-bold text-white mb-2">{selectedModel.title}</h3>
                 
-                {/* Description with Line Breaks in Modal - FIXED: Use whitespace-pre-line */}
+                {/* Description with Line Breaks in Modal */}
                 <div className="text-gray-400 mb-4 whitespace-pre-line">
                   {selectedModel.description}
                 </div>

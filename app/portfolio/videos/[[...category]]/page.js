@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
 
 // Helper function to format Google Drive thumbnail URLs
 const formatThumbnailUrl = (url) => {
@@ -66,8 +67,52 @@ const isValidImage = (url) => {
   }
 };
 
+const filters = [
+  { id: "all", label: "All Videos" },
+  { id: "Short form Videos", label: "Short Form" },
+  { id: "Gaming Videos", label: "Gaming" },
+  { id: "Social Media Videos", label: "Social Media" },
+  { id: "Explainer Videos", label: "Explainer" },
+  { id: "Documentaries", label: "Documentaries" },
+  { id: "Motion Graphics", label: "Motion Graphics" },
+  { id: "Ads", label: "Ads" },
+  { id: "Music Videos", label: "Music Videos" },
+  { id: "VFX", label: "VFX" }
+];
+
+const stats = [
+  { number: "50+", label: "Video Projects", icon: Play },
+  { number: "2M+", label: "Total Views", icon: Eye },
+  { number: "98%", label: "Client Satisfaction", icon: Star },
+  { number: "24/7", label: "Support", icon: Users }
+];
+
+// Helper to slugify a string for URL-friendly paths
+const slugify = (text) => {
+  if (!text) return "";
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')        // Replace spaces with -
+    .replace(/[^\w\-]+/g, '')     // Remove all non-word chars
+    .replace(/\-\-+/g, '-');     // Replace multiple - with single -
+};
+
+const getFilterIdFromSlug = (slug) => {
+  if (!slug || slug === "all") return "all";
+  const matchedFilter = filters.find(f => slugify(f.id) === slug);
+  return matchedFilter ? matchedFilter.id : "all";
+};
+
 const VideosPage = () => {
-  const [activeFilter, setActiveFilter] = useState("all");
+  const params = useParams();
+  const router = useRouter();
+  
+  // Extract category slug from parameters (using optional catch-all structure)
+  const categorySlug = params?.category?.[0] || "all";
+  const activeFilter = getFilterIdFromSlug(categorySlug);
+
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [videoProjects, setVideoProjects] = useState([]);
@@ -78,25 +123,15 @@ const VideosPage = () => {
   const [thumbnailErrors, setThumbnailErrors] = useState({});
   const filterContainerRef = useRef(null);
 
-  const filters = [
-    { id: "all", label: "All Videos" },
-    { id: "Short form Videos", label: "Short Form" },
-    { id: "Gaming Videos", label: "Gaming" },
-    { id: "Social Media Videos", label: "Social Media" },
-    { id: "Explainer Videos", label: "Explainer" },
-    { id: "Documentaries", label: "Documentaries" },
-    { id: "Motion Graphics", label: "Motion Graphics" },
-    { id: "Ads", label: "Ads" },
-    { id: "Music Videos", label: "Music Videos" },
-    { id: "VFX", label: "VFX" }
-  ];
-
-  const stats = [
-    { number: "50+", label: "Video Projects", icon: Play },
-    { number: "2M+", label: "Total Views", icon: Eye },
-    { number: "98%", label: "Client Satisfaction", icon: Star },
-    { number: "24/7", label: "Support", icon: Users }
-  ];
+  // Navigate to slug on filter click
+  const handleFilterClick = (filterId) => {
+    const slug = slugify(filterId);
+    if (slug === "all") {
+      router.push("/portfolio/videos");
+    } else {
+      router.push(`/portfolio/videos/${slug}`);
+    }
+  };
 
   // Updated filtering logic to handle multiple categories
   const filteredVideos = activeFilter === "all"
@@ -609,7 +644,7 @@ const VideosPage = () => {
                 {filters.map((filter) => (
                   <motion.button
                     key={filter.id}
-                    onClick={() => setActiveFilter(filter.id)}
+                    onClick={() => handleFilterClick(filter.id)}
                     className={`px-6 py-3 rounded-full border backdrop-blur-sm transition-all duration-500 flex items-center gap-2 whitespace-nowrap flex-shrink-0 ${activeFilter === filter.id
                       ? "bg-lime-500/20 border-lime-500 text-lime-400 shadow-2xl shadow-lime-500/25"
                       : "bg-gray-900/50 border-gray-600 text-gray-400 hover:border-lime-500/50 hover:text-lime-300"
@@ -835,7 +870,7 @@ const VideosPage = () => {
                   No videos match the selected category. Try choosing a different filter.
                 </p>
                 <button
-                  onClick={() => setActiveFilter("all")}
+                  onClick={() => handleFilterClick("all")}
                   className="mt-4 px-6 py-2 bg-lime-500 hover:bg-lime-600 text-white rounded-lg transition-colors"
                 >
                   Show All Videos

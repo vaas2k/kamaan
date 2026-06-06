@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
 
 // Helper function to format Google Drive thumbnail URLs
 const formatThumbnailUrl = (url) => {
@@ -55,41 +56,75 @@ const formatDescription = (text) => {
   ));
 };
 
+const filters = [
+  { id: "all", label: "All Projects" },
+  { id: "E-Commerce", label: "E-Commerce" },
+  { id: "Portfolio Websites", label: "Portfolio" },
+  { id: "Blogs Websites", label: "Blogs" },
+  { id: "Business Websites", label: "Business" },
+  { id: "Educational Platforms", label: "Educational" },
+  { id: "Social Media Apps", label: "Social Media" },
+  { id: "Dashboard & Analytics", label: "Dashboard" },
+  { id: "SAAS Products", label: "SAAS" },
+  { id: "Landing Pages", label: "Landing Pages" }
+];
+
+const typeIcons = {
+  "website": Monitor,
+  "web-app": Globe,
+  "dashboard": Code,
+  "mobile-app": Smartphone,
+  "default": Globe
+};
+
+const stats = [
+  { number: "80+", label: "Web Projects", icon: Globe },
+  { number: "1.5M+", label: "Total Views", icon: Eye },
+  { number: "99%", label: "Client Satisfaction", icon: Star },
+  { number: "50+", label: "Technologies", icon: Zap }
+];
+
+// Helper to slugify a string for URL-friendly paths
+const slugify = (text) => {
+  if (!text) return "";
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')        // Replace spaces with -
+    .replace(/[^\w\-]+/g, '')     // Remove all non-word chars
+    .replace(/\-\-+/g, '-');     // Replace multiple - with single -
+};
+
+const getFilterIdFromSlug = (slug) => {
+  if (!slug || slug === "all") return "all";
+  const matchedFilter = filters.find(f => slugify(f.id) === slug);
+  return matchedFilter ? matchedFilter.id : "all";
+};
+
 const WebsitesPage = () => {
-  const [activeFilter, setActiveFilter] = useState("all");
+  const params = useParams();
+  const router = useRouter();
+
+  // Extract category slug from parameters (using optional catch-all structure)
+  const categorySlug = params?.category?.[0] || "all";
+  const activeFilter = getFilterIdFromSlug(categorySlug);
+
   const [selectedWebsite, setSelectedWebsite] = useState(null);
   const [hoveredWebsite, setHoveredWebsite] = useState(null);
   const [websiteProjects, setWebsiteProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [thumbnailErrors, setThumbnailErrors] = useState({});
 
-  const filters = [
-    { id: "all", label: "All Projects" },
-    { id: "E-Commerce", label: "E-Commerce" },
-    { id: "Portfolio Websites", label: "Portfolio" },
-    { id: "Blogs Websites", label: "Blogs" },
-    { id: "Business Websites", label: "Business" },
-    { id: "Educational Platforms", label: "Educational" },
-    { id: "Social Media Apps", label: "Social Media" },
-    { id: "Dashboard & Analytics", label: "Dashboard" },
-    { id: "SAAS Products", label: "SAAS" },
-    { id: "Landing Pages", label: "Landing Pages" }
-  ];
-
-  const typeIcons = {
-    "website": Monitor,
-    "web-app": Globe,
-    "dashboard": Code,
-    "mobile-app": Smartphone,
-    "default": Globe
+  // Navigate to slug on filter click
+  const handleFilterClick = (filterId) => {
+    const slug = slugify(filterId);
+    if (slug === "all") {
+      router.push("/portfolio/websites");
+    } else {
+      router.push(`/portfolio/websites/${slug}`);
+    }
   };
-
-  const stats = [
-    { number: "80+", label: "Web Projects", icon: Globe },
-    { number: "1.5M+", label: "Total Views", icon: Eye },
-    { number: "99%", label: "Client Satisfaction", icon: Star },
-    { number: "50+", label: "Technologies", icon: Zap }
-  ];
 
   // Safe data access functions
   const getFeatures = (website) => {
@@ -361,7 +396,7 @@ const WebsitesPage = () => {
               {filters.map((filter) => (
                 <motion.button
                   key={filter.id}
-                  onClick={() => setActiveFilter(filter.id)}
+                  onClick={() => handleFilterClick(filter.id)}
                   className={`px-6 py-3 rounded-full border backdrop-blur-sm transition-all duration-500 flex items-center gap-2 ${activeFilter === filter.id
                       ? "bg-lime-500/20 border-lime-500 text-lime-400 shadow-2xl shadow-lime-500/25"
                       : "bg-gray-900/50 border-gray-600 text-gray-400 hover:border-lime-500/50 hover:text-lime-300"
@@ -586,7 +621,7 @@ const WebsitesPage = () => {
                   No websites match the selected category. Try choosing a different filter.
                 </p>
                 <button
-                  onClick={() => setActiveFilter("all")}
+                  onClick={() => handleFilterClick("all")}
                   className="mt-4 px-6 py-2 bg-lime-500 hover:bg-lime-600 text-white rounded-lg transition-colors"
                 >
                   Show All Websites
