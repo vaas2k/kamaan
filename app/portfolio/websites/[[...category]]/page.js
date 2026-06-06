@@ -13,12 +13,12 @@ import { useParams, useRouter } from "next/navigation";
 // Helper function to format Google Drive thumbnail URLs
 const formatThumbnailUrl = (url) => {
   if (!url) return null;
-  
+
   // Handle Google Drive URLs
   if (url.includes('drive.google.com')) {
     // Extract file ID from various Google Drive URL formats
     let fileId = '';
-    
+
     // Format 1: https://drive.google.com/file/d/FILE_ID/view
     const driveMatch = url.match(/\/d\/([^\/]+)/);
     if (driveMatch && driveMatch[1]) {
@@ -35,12 +35,12 @@ const formatThumbnailUrl = (url) => {
     else if (url.length === 33 && !url.includes('/')) {
       fileId = url; // Might be just the file ID
     }
-    
+
     if (fileId) {
       return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
     }
   }
-  
+
   return url;
 };
 
@@ -166,12 +166,12 @@ const WebsitesPage = () => {
   // Calculate dynamic stats from website data
   const calculateStats = () => {
     if (websiteProjects.length === 0) return stats;
-    
+
     const totalWebsites = websiteProjects.length;
     const totalViews = websiteProjects.reduce((sum, website) => sum + (website.views || 0), 0);
     const uniqueTechnologies = [...new Set(websiteProjects.flatMap(w => getTags(w)))].length;
     const uniqueClients = [...new Set(websiteProjects.map(w => w.client))].length;
-    
+
     return [
       { number: `${totalWebsites}+`, label: "Web Projects", icon: Globe },
       { number: `${(totalViews / 1000000).toFixed(1)}M+`, label: "Total Views", icon: Eye },
@@ -386,29 +386,25 @@ const WebsitesPage = () => {
         <section className="relative py-32 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             {/* Filter Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              className="flex flex-wrap justify-center gap-4 mb-16"
+            <div
+              ref={filterContainerRef}
+              className="flex overflow-x-auto scrollbar-hide gap-3 mx-12"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {filters.map((filter) => (
-                <motion.button
+                <button
                   key={filter.id}
                   onClick={() => handleFilterClick(filter.id)}
-                  className={`px-6 py-3 rounded-full border backdrop-blur-sm transition-all duration-500 flex items-center gap-2 ${activeFilter === filter.id
+                  className={`px-6 py-3 rounded-full border backdrop-blur-sm transition-all duration-300 flex items-center gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer ${activeFilter === filter.id
                       ? "bg-lime-500/20 border-lime-500 text-lime-400 shadow-2xl shadow-lime-500/25"
-                      : "bg-gray-900/50 border-gray-600 text-gray-400 hover:border-lime-500/50 hover:text-lime-300"
+                      : "bg-gray-900/50 border-gray-600 text-gray-400 hover:border-lime-500/50 hover:text-lime-300 hover:bg-lime-500/5"
                     }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
                 >
                   <Filter className="w-4 h-4" />
                   {filter.label}
-                </motion.button>
+                </button>
               ))}
-            </motion.div>
+            </div>
 
             {/* Websites Grid */}
             <motion.div
@@ -498,7 +494,7 @@ const WebsitesPage = () => {
                         {/* Categories Badges */}
                         <div className="absolute top-12 left-4 flex flex-wrap gap-1 max-w-[60%]">
                           {getCategories(website).slice(0, 2).map((category, catIndex) => (
-                            <span 
+                            <span
                               key={catIndex}
                               className="bg-blue-500/90 backdrop-blur-sm rounded-full px-2 py-1 text-white text-xs font-medium truncate"
                               title={category}
@@ -712,7 +708,7 @@ const WebsitesPage = () => {
                     <ArrowRight className="w-5 h-5" />
                   </motion.button>
                 </Link>
-                
+
                 <Link href={'/portfolio'}>
                   <motion.button
                     whileHover={{ scale: 1.05, y: -2 }}
@@ -804,12 +800,12 @@ const WebsitesPage = () => {
               <div className="space-y-6">
                 <div>
                   <h3 className="text-3xl font-bold text-white mb-2">{selectedWebsite.title}</h3>
-                  
+
                   {/* Description with Line Breaks in Modal */}
                   <div className="text-gray-400 mb-4 whitespace-pre-line">
                     {formatDescription(selectedWebsite.description)}
                   </div>
-                  
+
                   <div className="flex items-center justify-between mb-4">
                     <div className="text-lime-400 font-semibold">{selectedWebsite.client}</div>
                     <div className="flex items-center gap-4 text-gray-400 text-sm">

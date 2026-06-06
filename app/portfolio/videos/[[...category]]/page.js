@@ -13,12 +13,12 @@ import { useParams, useRouter } from "next/navigation";
 // Helper function to format Google Drive thumbnail URLs
 const formatThumbnailUrl = (url) => {
   if (!url) return null;
-  
+
   // Handle Google Drive URLs
   if (url.includes('drive.google.com')) {
     // Extract file ID from various Google Drive URL formats
     let fileId = '';
-    
+
     // Format 1: https://drive.google.com/file/d/FILE_ID/view
     const driveMatch = url.match(/\/d\/([^\/]+)/);
     if (driveMatch && driveMatch[1]) {
@@ -35,12 +35,12 @@ const formatThumbnailUrl = (url) => {
     else if (url.length === 33 && !url.includes('/')) {
       fileId = url; // Might be just the file ID
     }
-    
+
     if (fileId) {
       return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
     }
   }
-  
+
   return url;
 };
 
@@ -108,7 +108,7 @@ const getFilterIdFromSlug = (slug) => {
 const VideosPage = () => {
   const params = useParams();
   const router = useRouter();
-  
+
   // Extract category slug from parameters (using optional catch-all structure)
   const categorySlug = params?.category?.[0] || "all";
   const activeFilter = getFilterIdFromSlug(categorySlug);
@@ -136,9 +136,9 @@ const VideosPage = () => {
   // Updated filtering logic to handle multiple categories
   const filteredVideos = activeFilter === "all"
     ? videoProjects
-    : videoProjects.filter(video => 
-        video.categories && video.categories.includes(activeFilter)
-      );
+    : videoProjects.filter(video =>
+      video.categories && video.categories.includes(activeFilter)
+    );
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -423,12 +423,12 @@ const VideosPage = () => {
   // Calculate dynamic stats from video data
   const calculateStats = () => {
     if (videoProjects.length === 0) return stats;
-    
+
     const totalVideos = videoProjects.length;
     const totalViews = videoProjects.reduce((sum, video) => sum + (video.views || 0), 0);
     const uniqueClients = [...new Set(videoProjects.map(v => v.client))].length;
     const uniqueCategories = [...new Set(videoProjects.flatMap(v => v.categories || []))].length;
-    
+
     return [
       { number: `${totalVideos}+`, label: "Video Projects", icon: Play },
       { number: `${(totalViews / 1000000).toFixed(1)}M+`, label: "Total Views", icon: Eye },
@@ -527,7 +527,7 @@ const VideosPage = () => {
                   backgroundSize: "200% 100%"
                 }}
               >
-                PROJECTS
+                PROJECTS 
               </motion.span>
             </motion.h1>
 
@@ -642,19 +642,18 @@ const VideosPage = () => {
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
                 {filters.map((filter) => (
-                  <motion.button
+                  <button
                     key={filter.id}
                     onClick={() => handleFilterClick(filter.id)}
-                    className={`px-6 py-3 rounded-full border backdrop-blur-sm transition-all duration-500 flex items-center gap-2 whitespace-nowrap flex-shrink-0 ${activeFilter === filter.id
-                      ? "bg-lime-500/20 border-lime-500 text-lime-400 shadow-2xl shadow-lime-500/25"
-                      : "bg-gray-900/50 border-gray-600 text-gray-400 hover:border-lime-500/50 hover:text-lime-300"
-                      }`}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    className={`px-6 py-3 rounded-full border backdrop-blur-sm transition-all duration-300 flex items-center gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer ${
+                      activeFilter === filter.id
+                        ? "bg-lime-500/20 border-lime-500 text-lime-400 shadow-2xl shadow-lime-500/25"
+                        : "bg-gray-900/50 border-gray-600 text-gray-400 hover:border-lime-500/50 hover:text-lime-300 hover:bg-lime-500/5"
+                    }`}
                   >
                     <Filter className="w-4 h-4" />
                     {filter.label}
-                  </motion.button>
+                  </button>
                 ))}
               </div>
 
@@ -732,7 +731,7 @@ const VideosPage = () => {
                         {/* Categories Badges */}
                         <div className="absolute top-4 left-4 flex flex-col gap-1 max-w-[60%]">
                           {video.categories && video.categories.slice(0, 2).map((category, catIndex) => (
-                            <span 
+                            <span
                               key={catIndex}
                               className="bg-lime-500/90 backdrop-blur-sm rounded-full px-2 py-1 text-white text-xs font-medium truncate"
                               title={category}
@@ -760,7 +759,7 @@ const VideosPage = () => {
                         <div className="absolute bottom-4 right-4 bg-blue-500/90 backdrop-blur-sm rounded-full px-3 py-1">
                           <div className="flex items-center gap-1 text-white text-xs">
                             <Eye className="w-3 h-3" />
-                            {video.views ? (video.views > 1000 ? `${(video.views/1000).toFixed(1)}K` : video.views) : '0'}
+                            {video.views ? (video.views > 1000 ? `${(video.views / 1000).toFixed(1)}K` : video.views) : '0'}
                           </div>
                         </div>
                       </div>
@@ -961,7 +960,7 @@ const VideosPage = () => {
                     <ArrowRight className="w-5 h-5" />
                   </motion.button>
                 </Link>
-                
+
                 <Link href={'/portfolio'}>
                   <motion.button
                     whileHover={{ scale: 1.05, y: -2 }}
@@ -1017,12 +1016,12 @@ const VideosPage = () => {
 
               <div className="mt-6">
                 <h3 className="text-2xl font-bold text-white mb-2">{selectedVideo.title}</h3>
-                
+
                 {/* Description with Line Breaks in Modal */}
                 <div className="text-gray-400 mb-4 whitespace-pre-line">
                   {formatDescription(selectedVideo.description)}
                 </div>
-                
+
                 {/* Categories in Modal */}
                 {selectedVideo.categories && selectedVideo.categories.length > 0 && (
                   <div className="mb-4">
