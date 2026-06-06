@@ -8,12 +8,12 @@ import axios, { AxiosError } from 'axios';
 // Helper function to format Google Drive thumbnail URLs
 const formatThumbnailUrl = (url) => {
   if (!url) return null;
-  
+
   // Handle Google Drive URLs
   if (url.includes('drive.google.com')) {
     // Extract file ID from various Google Drive URL formats
     let fileId = '';
-    
+
     // Format 1: https://drive.google.com/file/d/FILE_ID/view
     const driveMatch = url.match(/\/d\/([^\/]+)/);
     if (driveMatch && driveMatch[1]) {
@@ -30,12 +30,12 @@ const formatThumbnailUrl = (url) => {
     else if (url.length === 33 && !url.includes('/')) {
       fileId = url; // Might be just the file ID
     }
-    
+
     if (fileId) {
       return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
     }
   }
-  
+
   return url;
 };
 
@@ -200,7 +200,7 @@ const WebsitesTab = () => {
   // Validate form
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.title.trim()) newErrors.title = 'Title is required';
     if (formData.categories.length === 0) newErrors.categories = 'Select at least one category';
     if (!formData.type.trim()) newErrors.type = 'Type is required';
@@ -213,33 +213,33 @@ const WebsitesTab = () => {
     // }
     if (!formData.liveUrl.trim()) newErrors.liveUrl = 'Live URL is required';
     if (!formData.githubUrl.trim()) newErrors.githubUrl = 'GitHub URL is required';
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleAddWebsite = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       alert('Please fix the errors in the form');
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
       // Preserve line breaks in description
       const websiteData = {
         ...formData,
         description: formData.description.trim()
       };
-      
+
       const response = await axios.post('/api/admin/web', websiteData);
 
       if (response.status === 200) {
         console.log('Website added successfully:', response.data);
-        
+
         // Reset form
         setFormData({
           title: '',
@@ -258,13 +258,13 @@ const WebsitesTab = () => {
         setTagInput('');
         setFeatureInput('');
         setErrors({});
-        
+
         // Refresh websites list
         fetchWebsites();
-        
+
         // Hide form
         setShowAddForm(false);
-        
+
         // Show success message
         alert('Website added successfully!');
       }
@@ -285,17 +285,17 @@ const WebsitesTab = () => {
     if (!confirm('Are you sure you want to delete this website? This action cannot be undone.')) {
       return;
     }
-    
+
     try {
       console.log('Attempting to delete website with id:', id);
       const response = await axios.delete(`/api/admin/web?id=${id}`);
 
       if (response.status === 200) {
         console.log('Website deleted successfully:', response.data);
-        
+
         // Refresh websites list
         fetchWebsites();
-        
+
         // Show success message
         alert('Website deleted successfully!');
       }
@@ -364,7 +364,7 @@ const WebsitesTab = () => {
                 <X className="w-5 h-5 text-gray-400" />
               </button>
             </div>
-            
+
             <form onSubmit={handleAddWebsite} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Title */}
@@ -380,16 +380,15 @@ const WebsitesTab = () => {
                       setFormData({ ...formData, title: e.target.value });
                       if (errors.title) setErrors({ ...errors, title: '' });
                     }}
-                    className={`w-full p-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none ${
-                      errors.title ? 'border-red-500' : 'border-lime-500/20 focus:border-lime-500'
-                    }`}
+                    className={`w-full p-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none ${errors.title ? 'border-red-500' : 'border-lime-500/20 focus:border-lime-500'
+                      }`}
                     required
                   />
                   {errors.title && (
                     <p className="mt-1 text-sm text-red-400">{errors.title}</p>
                   )}
                 </div>
-                
+
                 {/* Categories */}
                 <div className="relative">
                   <label className="block text-sm font-medium text-lime-400 mb-2">
@@ -398,13 +397,12 @@ const WebsitesTab = () => {
                   <button
                     type="button"
                     onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-                    className={`w-full p-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none flex justify-between items-center ${
-                      errors.categories ? 'border-red-500' : 'border-lime-500/20 focus:border-lime-500'
-                    }`}
+                    className={`w-full p-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none flex justify-between items-center ${errors.categories ? 'border-red-500' : 'border-lime-500/20 focus:border-lime-500'
+                      }`}
                   >
                     <span className="text-left">
-                      {formData.categories.length === 0 
-                        ? "Select Categories" 
+                      {formData.categories.length === 0
+                        ? "Select Categories"
                         : formData.categories.slice(0, 2).join(', ') + (formData.categories.length > 2 ? ` +${formData.categories.length - 2} more` : '')
                       }
                     </span>
@@ -463,9 +461,8 @@ const WebsitesTab = () => {
                       setFormData({ ...formData, type: e.target.value });
                       if (errors.type) setErrors({ ...errors, type: '' });
                     }}
-                    className={`w-full p-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none ${
-                      errors.type ? 'border-red-500' : 'border-lime-500/20 focus:border-lime-500'
-                    }`}
+                    className={`w-full p-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none ${errors.type ? 'border-red-500' : 'border-lime-500/20 focus:border-lime-500'
+                      }`}
                     required
                   />
                   {errors.type && (
@@ -486,9 +483,8 @@ const WebsitesTab = () => {
                       setFormData({ ...formData, duration: e.target.value });
                       if (errors.duration) setErrors({ ...errors, duration: '' });
                     }}
-                    className={`w-full p-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none ${
-                      errors.duration ? 'border-red-500' : 'border-lime-500/20 focus:border-lime-500'
-                    }`}
+                    className={`w-full p-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none ${errors.duration ? 'border-red-500' : 'border-lime-500/20 focus:border-lime-500'
+                      }`}
                     required
                   />
                   {errors.duration && (
@@ -511,9 +507,8 @@ const WebsitesTab = () => {
                       setFormData({ ...formData, liveUrl: e.target.value });
                       if (errors.liveUrl) setErrors({ ...errors, liveUrl: '' });
                     }}
-                    className={`w-full p-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none ${
-                      errors.liveUrl ? 'border-red-500' : 'border-lime-500/20 focus:border-lime-500'
-                    }`}
+                    className={`w-full p-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none ${errors.liveUrl ? 'border-red-500' : 'border-lime-500/20 focus:border-lime-500'
+                      }`}
                     required
                   />
                   {errors.liveUrl && (
@@ -534,10 +529,9 @@ const WebsitesTab = () => {
                       setFormData({ ...formData, githubUrl: e.target.value });
                       if (errors.githubUrl) setErrors({ ...errors, githubUrl: '' });
                     }}
-                    className={`w-full p-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none ${
-                      errors.githubUrl ? 'border-red-500' : 'border-lime-500/20 focus:border-lime-500'
-                    }`}
-                    required
+                    className={`w-full p-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none ${errors.githubUrl ? 'border-red-500' : 'border-lime-500/20 focus:border-lime-500'
+                      }`}
+
                   />
                   {errors.githubUrl && (
                     <p className="mt-1 text-sm text-red-400">{errors.githubUrl}</p>
@@ -560,9 +554,8 @@ const WebsitesTab = () => {
                         setFormData({ ...formData, thumbnail: e.target.value });
                         if (errors.thumbnail) setErrors({ ...errors, thumbnail: '' });
                       }}
-                      className={`w-full p-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none ${
-                        errors.thumbnail ? 'border-red-500' : 'border-lime-500/20 focus:border-lime-500'
-                      }`}
+                      className={`w-full p-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none ${errors.thumbnail ? 'border-red-500' : 'border-lime-500/20 focus:border-lime-500'
+                        }`}
                       required
                     />
                     <div className="absolute right-3 top-3">
@@ -572,7 +565,7 @@ const WebsitesTab = () => {
                   {errors.thumbnail && (
                     <p className="mt-1 text-sm text-red-400">{errors.thumbnail}</p>
                   )}
-                  
+
                   {/* Thumbnail Preview */}
                   {thumbnailPreview && (
                     <div className="mt-3">
@@ -614,9 +607,8 @@ const WebsitesTab = () => {
                       setFormData({ ...formData, client: e.target.value });
                       if (errors.client) setErrors({ ...errors, client: '' });
                     }}
-                    className={`w-full p-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none ${
-                      errors.client ? 'border-red-500' : 'border-lime-500/20 focus:border-lime-500'
-                    }`}
+                    className={`w-full p-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none ${errors.client ? 'border-red-500' : 'border-lime-500/20 focus:border-lime-500'
+                      }`}
                     required
                   />
                   {errors.client && (
@@ -647,9 +639,8 @@ You can use line breaks for better formatting...
                     if (errors.description) setErrors({ ...errors, description: '' });
                   }}
                   rows="5"
-                  className={`w-full p-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none whitespace-pre-wrap ${
-                    errors.description ? 'border-red-500' : 'border-lime-500/20 focus:border-lime-500'
-                  }`}
+                  className={`w-full p-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none whitespace-pre-wrap ${errors.description ? 'border-red-500' : 'border-lime-500/20 focus:border-lime-500'
+                    }`}
                   required
                 />
                 <div className="flex justify-between mt-1">
@@ -660,7 +651,7 @@ You can use line breaks for better formatting...
                     Press Enter for new lines
                   </p>
                 </div>
-                
+
                 {/* Description Preview */}
                 {formData.description && (
                   <div className="mt-3 p-3 bg-gray-800/30 rounded-lg border border-gray-700">
@@ -847,22 +838,22 @@ You can use line breaks for better formatting...
                     </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  
+
                   {/* Type Badge */}
                   <div className="absolute top-3 right-3 bg-blue-500/90 text-white px-2 py-1 rounded text-xs font-medium">
                     {website.type}
                   </div>
-                  
+
                   {/* Duration Badge */}
                   <div className="absolute bottom-3 left-3 bg-purple-500/90 text-white px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
                     <Clock className="w-3 h-3" />
                     {website.duration}
                   </div>
-                  
+
                   {/* Categories Badges */}
                   <div className="absolute top-3 left-3 flex flex-col gap-1 max-w-[60%]">
                     {website.categories && website.categories.slice(0, 2).map((category, catIndex) => (
-                      <span 
+                      <span
                         key={catIndex}
                         className="bg-lime-500/90 text-white px-2 py-1 rounded text-xs font-medium truncate"
                         title={category}
